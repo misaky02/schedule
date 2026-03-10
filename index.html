@@ -227,7 +227,7 @@
 </div>
 
 <div id="main-content" style="display:none;flex-direction:column;height:100vh">
-<div class="header">
+<div class="header" style="display:flex;align-items:center;gap:8px;padding:8px 16px;">
   <div class="month-nav">
     <button onclick="changeMonth(-1)">‹</button>
     <div class="month-label" id="month-label"></div>
@@ -455,7 +455,7 @@ function renderTodoList() {
   if(!list.length){el.innerHTML='<div class="no-item">TODOはありません</div>'+doneBtn;return;}
   el.innerHTML=doneBtn+list.map(t=>{
     const tc=getTC(t.teacher);
-    return '<div class="todo-item" style="border-color:'+tc.bg+';background:'+tc.bg+'44">'
+    return '<div class="todo-item" style="border-color:'+tc.bg+';background:'+tc.bg+'44;cursor:grab;" draggable="true" data-id="'+t.id+'" ondragstart="todoDragStart(event,this)" ondragover="todoDragOver(event,this)" ondragleave="todoDragLeave(this)" ondrop="todoDrop(event,this)">'
       +'<input type="checkbox" class="todo-check" '+(t.done?'checked':'')+' onchange="toggleTodo(\'' +t.id+ '\')">'
       +'<div style="flex:1;min-width:0">'
       +'<div class="todo-text'+(t.done?' done':'')+'">'+t.text+'</div>'
@@ -698,6 +698,91 @@ async function onDayDrop(e, newDate) {
   _dragId = '';
 }
 
+// ===== UNDO / REDO =====
+var _history = [];
+var _historyIdx = -1;
+var _historyLock = false;
+
+function saveHistory() {
+  if (_historyLock) return;
+  // 現在位置より先の履歴を削除
+  _history = _history.slice(0, _historyIdx + 1);
+  _history.push({
+    schedules: JSON.parse(JSON.stringify(schedules)),
+    todos: JSON.parse(JSON.stringify(todos))
+  });
+  if (_history.length > 50) _history.shift();
+  _historyIdx = _history.length - 1;
+}
+
+function applyHistory(state) {
+  _historyLock = true;
+  schedules = JSON.parse(JSON.stringify(state.schedules));
+  todos = JSON.parse(JSON.stringify(state.todos));
+  renderCalendar();
+  renderList();
+  renderTodoList();
+  _historyLock = false;
+}
+
+function undo() {
+  if (_historyIdx <= 0) return;
+  _historyIdx--;
+  applyHistory(_history[_historyIdx]);
+  showUndoToast('元に戻しました');
+}
+
+function redo() {
+  if (_historyIdx >= _history.length - 1) return;
+  _historyIdx++;
+  applyHistory(_history[_historyIdx]);
+  showUndoToast('やり直しました');
+}
+
+function showUndoToast(msg) {
+  var t = document.getElementById('undo-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.style.opacity = '0'; }, 1500);
+}
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+});
+
+// ===== TODO ドラッグ並べ替え =====
+var _todoDragId = '';
+function todoDragStart(e, el) {
+  _todoDragId = el.dataset.id;
+  el.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function todoDragOver(e, el) {
+  e.preventDefault();
+  if (el.dataset.id !== _todoDragId) el.classList.add('drag-target');
+}
+function todoDragLeave(el) { el.classList.remove('drag-target'); }
+function todoDrop(e, el) {
+  e.preventDefault();
+  el.classList.remove('drag-target');
+  var targetId = el.dataset.id;
+  if (!_todoDragId || _todoDragId === targetId) return;
+  var fromIdx = todos.findIndex(function(t){ return t.id === _todoDragId; });
+  var toIdx   = todos.findIndex(function(t){ return t.id === targetId; });
+  if (fromIdx < 0 || toIdx < 0) return;
+  var moved = todos.splice(fromIdx, 1)[0];
+  todos.splice(toIdx, 0, moved);
+  saveHistory();
+  renderTodoList();
+}
+document.addEventListener('dragend', function() {
+  document.querySelectorAll('.todo-item.dragging').forEach(function(el){ el.classList.remove('dragging'); });
+  document.querySelectorAll('.todo-item.drag-target').forEach(function(el){ el.classList.remove('drag-target'); });
+});
+
 // ===== スケジュール編集ポップアップ =====
 var _editId = '';
 function openEditPopup(id, e) {
@@ -791,6 +876,7 @@ async function loadSchedules() {
       };
     });
     renderCalendar(); renderList();
+    saveHistory();
   } catch(e) { console.error('スケジュール読み込みエラー', e); }
 }
 
@@ -855,6 +941,7 @@ async function loadTodos() {
       };
     });
     renderTodoList();
+    saveHistory();
   } catch(e) { console.error('TODO読み込みエラー', e); }
 }
 
@@ -1110,5 +1197,6 @@ function checkPin() {
   <div style="font-size:12px;color:#6b6b8a;font-weight:500;">Notionと同期中...</div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-</div></body>
+</div><div id="undo-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#3a3a6e;color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-family:inherit;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;"></div>
+</body>
 </html>
