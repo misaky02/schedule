@@ -49,11 +49,7 @@
 
   /* CALENDAR */
   .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
-  .week-section { background: var(--surface); border-top: 1px solid var(--border); padding: 14px 18px; flex-shrink: 0; }
-  .week-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-  .week-title { font-size: 12px; font-weight: 600; color: var(--text-2); letter-spacing: 0.03em; white-space: nowrap; }
-  .week-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px; }
-  .week-list .sched-item { flex: 1 1 200px; min-width: 180px; max-width: 320px; }
+
   .dow-header {
     display: grid; grid-template-columns: repeat(7,1fr);
     background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -66,7 +62,7 @@
     border-left: 1px solid var(--border); border-top: 1px solid var(--border);
     overflow-y: auto; flex: 1; align-content: start;
   }
-  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 90px; padding: 5px; background: var(--surface); transition: background 0.1s; }
+  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 76px; padding: 5px; background: var(--surface); transition: background 0.1s; }
   .cal-day.other-month { background: var(--bg); }
   .cal-day.today-bg { background: #f0f0ff; }
   .cal-day.holiday-bg { background: var(--surface) !important; }
@@ -146,11 +142,12 @@
   /* Schedule list */
   .sched-list { display: flex; flex-direction: column; gap: 4px; }
   .sched-item {
-    padding: 7px 9px; border-radius: var(--radius-sm); border-left: 2px solid;
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;
+    padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    background: var(--surface2);
   }
   .sched-title { font-size: 11px; font-weight: 600; }
-  .sched-sub { font-size: 10px; color: var(--text-2); margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; }
+  .sched-sub { font-size: 9.5px; color: var(--text-2); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
   .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; margin-top: 2px; }
   .btn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; }
   .btn-del:hover { color: #ff8888; background: rgba(255,100,100,0.1); }
@@ -175,6 +172,32 @@
   select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a8a8c0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px !important; }
   
 
+  /* QUICK ADD POPUP */
+  .quick-popup {
+    position: fixed; z-index: 300;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    width: 280px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .quick-popup-title { font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; }
+  .quick-popup input, .quick-popup select {
+    width: 100%; padding: 7px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 12px; color: var(--text);
+    font-family: inherit; background: var(--surface2); outline: none;
+    transition: border-color 0.15s;
+  }
+  .quick-popup input:focus, .quick-popup select:focus { border-color: var(--accent); }
+  .quick-popup-row { display: flex; gap: 6px; }
+  .quick-popup-row input { flex: 1; }
+  .quick-popup-btns { display: flex; gap: 6px; margin-top: 2px; }
+  .quick-popup-btns button { flex: 1; padding: 8px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .btn-quick-save { background: #ccccff; color: #3a3a6e; }
+  .btn-quick-save:hover { opacity: 0.85; }
+  .btn-quick-cancel { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border) !important; }
+  .btn-quick-cancel:hover { background: var(--border); }
+
+  .week-section { border-top: 1px solid var(--border); padding: 8px 16px 10px; background: var(--surface); }
   /* MODAL */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
   .modal { background: var(--surface); border-radius: var(--radius); padding: 22px; width: min(380px,95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
@@ -223,71 +246,26 @@
     </div>
     <div class="cal-body" id="cal-body"></div>
     <!-- 今後1週間の予定 -->
-    <div class="week-section">
-      <div class="week-header">
-        <span class="week-title"><span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="14" r="1.2"/><circle cx="12" cy="14" r="1.2"/><circle cx="16" cy="14" r="1.2"/></svg>今後1週間の予定</span></span>
-        <div class="filter-tabs" id="filter-tabs"></div>
-      </div>
-      <div class="sched-list week-list" id="schedule-list"></div>
+    <div class="week-section" id="week-section">
+<div class="sec-block">
+      <div class="sec-title week-title"><span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.2" fill="currentColor"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/><circle cx="16" cy="14" r="1.2" fill="currentColor"/></svg>今後1週間の予定</span></div>
+      <div class="filter-tabs" id="filter-tabs"></div>
+      <div class="sched-list" id="schedule-list"></div>
+    </div>
     </div>
   </div>
 
   <!-- RIGHT PANEL -->
   <div class="panel">
 
-    <!-- 入力 -->
-    <div class="sec-block">
-      <div class="sec-title collapsible" onclick="toggleCollapse('form-body',this)"><span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 3h14v2H3zm0 4h14v2H3zm0 4h8v2H3zm10.5 1.5l1.5-1.5 3 3-5 5H11v-2.5l2.5-4zm2.5-.5l1 1-4 4-1-1 4-4z"/></svg>スケジュール入力</span><span class="collapse-arrow open" id="arrow-form-body">▼</span></div>
-      <div class="collapsible-body" id="form-body" style="max-height:1000px;">
-      <div class="form-group" style="margin-top:10px;">
-        <label>日付</label>
-        <input type="date" id="f-date" onchange="document.getElementById('f-date-end').value=this.value">
-      </div>
-      <div class="form-group">
-        <label>開始時間</label>
-        <input type="time" id="f-time-start" value="09:00">
-      </div>
-      <div class="form-group">
-        <label>終了日</label>
-        <input type="date" id="f-date-end">
-      </div>
-      <div class="form-group">
-        <label>終了時間</label>
-        <input type="time" id="f-time-end" value="10:00">
-      </div>
-      <div class="form-group">
-        <label>タグ</label>
-        <select id="f-teacher">
-          <option value="">選択してください</option>
-          <option>小畑先生</option><option>山森先生</option><option>あさ稲先生</option>
-          <option>畠先生</option><option>壱先生</option><option>熊雪先生</option>
-          <option>編集部予定</option><option>プライベート</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>内容</label>
-        <select id="f-content">
-          <option value="">選択してください</option>
-          <option>告知</option><option>締切</option><option>イベント・フェア</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>URL</label>
-        <input type="text" id="f-url" placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>メモ</label>
-        <textarea id="f-memo" placeholder="詳細・場所など"></textarea>
-      </div>
-      <button class="btn-add" onclick="addSchedule()" style="margin-top:8px;">＋ カレンダーに追加</button>
-      </div>
-    </div>
+    
 
-
+    
     <!-- 検索 -->
     <div class="sec-block">
+      <div class="sec-title"><span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>検索</span></div>
       <div class="search-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg></span>
         <input type="text" id="search-input" placeholder="スケジュールを検索..." oninput="renderList()">
       </div>
     </div>
@@ -309,6 +287,35 @@
       <div class="todo-list" id="todo-list"></div>
     </div>
 
+  </div>
+</div>
+
+<!-- QUICK ADD POPUP -->
+<div id="quick-popup" class="quick-popup" style="display:none;">
+  <div class="quick-popup-title">
+    <span id="quick-popup-date"></span>
+    <button onclick="closeQuickAdd()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
+  </div>
+  <input type="text" id="qp-title" placeholder="タイトル（タグ名）を入力..." onkeydown="if(event.key==='Enter')saveQuickAdd()">
+  <div class="quick-popup-row">
+    <input type="time" id="qp-start" value="09:00">
+    <input type="time" id="qp-end" value="10:00">
+  </div>
+  <select id="qp-teacher">
+    <option value="">タグを選択</option>
+    <option>小畑先生</option><option>山森先生</option><option>あさ稲先生</option>
+    <option>畠先生</option><option>壱先生</option><option>熊雪先生</option>
+    <option>編集部予定</option><option>プライベート</option>
+  </select>
+  <select id="qp-content">
+    <option value="">内容（任意）</option>
+    <option>告知</option><option>締切</option><option>イベント・フェア</option>
+  </select>
+  <input type="text" id="qp-url" placeholder="URL（任意）">
+  <input type="text" id="qp-memo" placeholder="メモ（任意）">
+  <div class="quick-popup-btns">
+    <button class="btn-quick-cancel" onclick="closeQuickAdd()">キャンセル</button>
+    <button class="btn-quick-save" onclick="saveQuickAdd()">＋ 追加</button>
   </div>
 </div>
 
@@ -489,12 +496,12 @@ function renderCalendar() {
       var inner=isStart
         ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+s.timeStart+' '+s.teacher+(s.content?' ['+s.content+']':'')+'</span>')
         :('<span style="opacity:0.6">'+s.teacher+'</span>');
-      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" onclick="openModal(this.dataset.date)">'+inner+'</div>';
+      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">'+inner+'</div>';
     }
     if(dayEvents.length>maxShow){
-      evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openModal(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
+      evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
     }
-    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
+    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)" ondblclick="openQuickAdd(this.dataset.date,event)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
   }
   document.getElementById('cal-body').innerHTML=html;
 }
@@ -704,8 +711,6 @@ function setLoading(on) {
 }
 
 // Init
-document.getElementById('f-date').value=fmt(new Date());
-document.getElementById('f-date-end').value=fmt(new Date());
 renderFilterTabs();
 renderTodoFilterTabs();
 renderCalendar();
@@ -714,15 +719,97 @@ loadSchedules();
 loadTodos();
 setTimeout(notifyTodaySchedules, 2000);
 
+// ===== クイック追加ポップアップ =====
+var _qpDate = '';
+function openQuickAdd(date, e) {
+  e.stopPropagation();
+  _qpDate = date;
+  var popup = document.getElementById('quick-popup');
+  var d = new Date(date);
+  document.getElementById('quick-popup-date').textContent = (d.getMonth()+1) + '月' + d.getDate() + '日';
+  document.getElementById('qp-title').value = '';
+  document.getElementById('qp-start').value = '09:00';
+  document.getElementById('qp-end').value = '10:00';
+  document.getElementById('qp-teacher').value = '';
+  document.getElementById('qp-content').value = '';
+  // 位置決め（クリック位置の近く、画面外に出ないよう調整）
+  var x = Math.min(e.clientX, window.innerWidth - 300);
+  var y = Math.min(e.clientY, window.innerHeight - 320);
+  popup.style.left = x + 'px';
+  popup.style.top = y + 'px';
+  popup.style.display = 'flex';
+  setTimeout(function(){ document.getElementById('qp-title').focus(); }, 50);
+  // 外クリックで閉じる
+  setTimeout(function(){
+    document.addEventListener('click', _qpOutside);
+  }, 100);
+}
+function _qpOutside(e) {
+  var popup = document.getElementById('quick-popup');
+  if (!popup.contains(e.target)) {
+    closeQuickAdd();
+  }
+}
+function closeQuickAdd() {
+  document.getElementById('quick-popup').style.display = 'none';
+  document.removeEventListener('click', _qpOutside);
+}
+async function saveQuickAdd() {
+  var teacher = document.getElementById('qp-teacher').value || document.getElementById('qp-title').value.trim();
+  var title = document.getElementById('qp-title').value.trim();
+  var start = document.getElementById('qp-start').value;
+  var end = document.getElementById('qp-end').value;
+  var content = document.getElementById('qp-content').value;
+  if (!teacher) { alert('タグを選択してください'); return; }
+  closeQuickAdd();
+  setLoading(true);
+  try {
+    await notionAPI('POST', '/pages', {
+      parent: { database_id: SCHEDULE_DB_ID },
+      properties: {
+        '名前': { title: [{ text: { content: (title||teacher) + ' ' + _qpDate } }] },
+        '日付': { date: { start: _qpDate, end: null } },
+        '開始時間': { rich_text: [{ text: { content: start } }] },
+        ...(end ? { '終了時間': { rich_text: [{ text: { content: end } }] } } : {}),
+        '先生名': { select: { name: teacher } },
+        ...(content ? { '内容': { select: { name: content } } } : {}),
+        ...(document.getElementById('qp-url').value.trim() ? { 'URL': { url: document.getElementById('qp-url').value.trim() } } : {}),
+        ...(document.getElementById('qp-memo').value.trim() ? { 'メモ': { rich_text: [{ text: { content: document.getElementById('qp-memo').value.trim() } }] } } : {}),
+      }
+    });
+    await loadSchedules();
+  } catch(e) { alert('保存に失敗しました: ' + e.message); }
+  setLoading(false);
+}
+
+// ===== 日付クリックで入力フォームを開く =====
+function openDayInput(date) {
+  // フォームに日付セット
+  var fi = document.getElementById('f-date');
+  var fe = document.getElementById('f-date-end');
+  if(fi) fi.value = date;
+  if(fe) fe.value = date;
+  // フォームを展開
+  var fb = document.getElementById('form-body');
+  var arrow = document.getElementById('arrow-form-body');
+  if(fb) { fb.classList.remove('collapsed'); fb.style.maxHeight='1000px'; }
+  if(arrow) arrow.classList.add('open');
+  // パネルを一番上にスクロール
+  var panel = document.querySelector('.panel');
+  if(panel) panel.scrollTop = 0;
+}
+
 // ===== 折りたたみ =====
 function toggleCollapse(id, titleEl) {
   var body = document.getElementById(id);
   var arrow = document.getElementById('arrow-' + id);
   if (body.classList.contains('collapsed')) {
     body.classList.remove('collapsed');
+    body.style.maxHeight = '1000px';
     if(arrow) arrow.classList.add('open');
   } else {
     body.classList.add('collapsed');
+    body.style.maxHeight = '0';
     if(arrow) arrow.classList.remove('open');
   }
 }
@@ -766,6 +853,7 @@ openModal = function(date) {
   var arrow = document.getElementById('arrow-form-body');
   if(fb && fb.classList.contains('collapsed')){
     fb.classList.remove('collapsed');
+    fb.style.maxHeight='1000px';
     if(arrow) arrow.classList.add('open');
   }
   // モーダルも開く（既存の動作）
