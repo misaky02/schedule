@@ -71,7 +71,7 @@
   .project-add-row { display: flex; gap: 5px; }
   .project-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
   .project-add-row input:focus { border-color: var(--accent); }
-  .btn-project-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .btn-project-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: var(--accent-bg); color: var(--accent-text); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
 
   /* PROJECT DETAIL PAGE */
   .project-detail-page {
@@ -110,7 +110,7 @@
   .task-add-row { display: flex; gap: 6px; }
   .task-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
   .task-add-row input:focus { border-color: var(--accent); }
-  .btn-task-add { padding: 7px 12px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .btn-task-add { padding: 7px 12px; border-radius: var(--radius-sm); border: none; background: var(--accent-bg); color: var(--accent-text); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
   /* プロジェクト情報編集 */
   .pd-info-row { display: flex; flex-direction: column; gap: 3px; }
   .pd-info-label { font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.05em; }
@@ -124,7 +124,7 @@
   .dow-cell.sat { color: #88aaff; }
   .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 96px; padding: 5px; padding-bottom: 4px; background: var(--surface); transition: background 0.1s; overflow: hidden; position: relative; }
   .cal-day.other-month { background: var(--bg); }
-  .cal-day.today-bg { background: #f0f0ff; }
+  .cal-day.today-bg { background: #e8e8ff; }
   .cal-day.holiday-bg { background: var(--surface) !important; }
   .cal-day:hover { background: var(--surface2); }
   .day-num {
@@ -132,7 +132,7 @@
     width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
     border-radius: 6px; margin-bottom: 3px;
   }
-  .day-num.today-circle { background: #ccccff; color: #3a3a6e; font-weight: 700; }
+  .day-num.today-circle { background: var(--accent-bg); color: var(--accent-text); font-weight: 700; }
   .day-num.sun { color: #ff8888; }
   .day-num.sat { color: #88aaff; }
   .other-month .day-num { opacity: 0.25; }
@@ -193,7 +193,7 @@
   .form-group textarea { resize: vertical; min-height: 44px; }
   .btn-add {
     padding: 9px; border-radius: var(--radius-sm); border: none;
-    background: #ccccff; color: #3a3a6e; font-size: 12px; font-weight: 600;
+    background: var(--accent-bg); color: var(--accent-text); font-size: 12px; font-weight: 600;
     cursor: pointer; font-family: inherit; transition: opacity 0.15s;
   }
   .btn-add:hover { opacity: 0.85; }
@@ -237,7 +237,7 @@
   .todo-add-row { display: flex; gap: 5px; }
   .todo-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
   .todo-add-row input:focus { border-color: var(--accent); }
-  .btn-todo-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-todo-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: var(--accent-bg); color: var(--accent-text); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
   .btn-todo-add:hover { opacity: 0.85; }
   .todo-list { display: flex; flex-direction: column; gap: 4px; }
   .todo-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 9px; border-radius: var(--radius-sm); border-left: 2px solid; transition: opacity 0.15s, transform 0.1s; }
@@ -274,7 +274,7 @@
   .quick-popup-row input { flex: 1; }
   .quick-popup-btns { display: flex; gap: 6px; margin-top: 2px; }
   .quick-popup-btns button { flex: 1; padding: 8px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .btn-quick-save { background: #ccccff; color: #3a3a6e; }
+  .btn-quick-save { background: var(--accent-bg); color: var(--accent-text); }
   .btn-quick-save:hover { opacity: 0.85; }
   .btn-quick-cancel { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border) !important; }
   .btn-quick-cancel:hover { background: var(--border); }
@@ -299,7 +299,7 @@
       autocomplete="off" inputmode="numeric"
       style="width:100%;padding:12px;border:1.5px solid #e4e4ee;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1a1a2e;background:#f5f5f8;box-sizing:border-box;">
     <div id="pin-error" style="color:#ff6b6b;font-size:12px;margin-top:8px;height:16px"></div>
-    <button id="pin-btn" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:#ccccff;color:#3a3a6e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
+    <button id="pin-btn" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent-bg);color:var(--accent-text);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
   </div>
 </div>
 
@@ -374,7 +374,7 @@
           </div>
           <textarea id="project-memo" placeholder="メモ（任意）" style="width:100%;resize:none;height:44px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;box-sizing:border-box;"></textarea>
           <div style="display:flex;gap:4px;flex-wrap:wrap;" id="project-status-filter">
-            <button class="ftab active" id="pf-all" onclick="setProjectFilter('すべて')" style="background:#6366f1;color:#fff;border-color:#6366f1;">すべて</button>
+            <button class="ftab active" id="pf-all" onclick="setProjectFilter('すべて')" style="background:#7b7bff;color:#fff;border-color:#7b7bff;">すべて</button>
             <button class="ftab" onclick="setProjectFilter('進行中')">進行中</button>
             <button class="ftab" onclick="setProjectFilter('未着手')">未着手</button>
             <button class="ftab" onclick="setProjectFilter('完了')">完了</button>
@@ -531,18 +531,18 @@ const HOLIDAYS = {
 
 
 const TEACHER_COLORS = {
-  '小畑先生':    { bg: '#fed7aa', text: '#9a3412' },
-  '山森先生':    { bg: '#fbc8d9', text: '#9d174d' },
-  'あさ稲先生':  { bg: '#fef08a', text: '#854d0e' },
-  '畠先生':      { bg: '#93c5fd', text: '#1e40af' },
-  '壱先生':      { bg: '#fca5a5', text: '#991b1b' },
-  '熊雪先生':    { bg: '#b2e8f5', text: '#0e7490' },
-  '編集部予定':  { bg: '#d8b4fe', text: '#6b21a8' },
-  'プライベート':{ bg: '#e2e8f0', text: '#475569' },
+  '小畑先生':    { bg: '#ffb8a0', text: '#7a2800' },
+  '山森先生':    { bg: '#ffaac8', text: '#7a0a40' },
+  'あさ稲先生':  { bg: '#ffe87a', text: '#6b4400' },
+  '畠先生':      { bg: '#80c8ff', text: '#003c6e' },
+  '壱先生':      { bg: '#ff9e9e', text: '#6e0a0a' },
+  '熊雪先生':    { bg: '#7ae8d8', text: '#004d44' },
+  '編集部予定':  { bg: '#c8a0ff', text: '#3c0080' },
+  'プライベート':{ bg: '#a8e8a0', text: '#1a4d18' },
 };
 const CONTENT_COLORS = {
-  '告知':             { bg: '#dbeafe', text: '#1e40af' },
-  '締切':             { bg: '#fee2e2', text: '#991b1b' },
+  '告知': { bg: '#dbeafe', text: '#1e40af' },
+  '締切': { bg: '#fee2e2', text: '#991b1b' },
   'フェア': { bg: '#d1fae5', text: '#065f46' },
 };
 const TEACHERS = Object.keys(TEACHER_COLORS);
@@ -607,7 +607,7 @@ let todoFilters = ['すべて'];
 function renderFilterTabs() {
   const el = document.getElementById('filter-tabs');
   el.innerHTML = ['すべて',...TEACHERS].map(t => {
-    const tc = t==='すべて' ? {bg:'#6366f1',text:'#fff'} : getTC(t);
+    const tc = t==='すべて' ? {bg:'#7b7bff',text:'#fff'} : getTC(t);
     const a = listFilters.includes(t);
     return `<button class="ftab${a?' active':''}" style="${a?`background:${tc.bg};color:${tc.text};border-color:${tc.bg}`:''}" onclick="setListFilter('${t}')">${t}</button>`;
   }).join('');
@@ -655,7 +655,7 @@ function setContentFilter(t) {
 function renderTodoFilterTabs() {
   const el = document.getElementById('todo-filter-tabs');
   el.innerHTML = ['すべて',...TEACHERS].map(t => {
-    const tc = t==='すべて' ? {bg:'#6366f1',text:'#fff'} : getTC(t);
+    const tc = t==='すべて' ? {bg:'#7b7bff',text:'#fff'} : getTC(t);
     const a = todoFilters.includes(t);
     return `<button class="ftab${a?' active':''}" style="${a?`background:${tc.bg};color:${tc.text};border-color:${tc.bg}`:''}" onclick="setTodoFilter('${t}')">${t}</button>`;
   }).join('');
@@ -690,7 +690,7 @@ function renderTodoList() {
   const undone = list.filter(t=>!t.done);
   const done   = list.filter(t=>t.done);
   list = showDone ? [...undone, ...done] : undone;
-  const doneBtn = doneCount>0 ? '<button onclick="showDone=!showDone;renderTodoList()" style="font-size:10px;color:#6366f1;background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">'+(showDone?'完了済みを隠す':'完了済みを表示 ('+doneCount+')')+'</button>' : '';
+  const doneBtn = doneCount>0 ? '<button onclick="showDone=!showDone;renderTodoList()" style="font-size:10px;color:#7b7bff;background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">'+(showDone?'完了済みを隠す':'完了済みを表示 ('+doneCount+')')+'</button>' : '';
   if(!list.length){el.innerHTML='<div class="no-item">TODOはありません</div>'+doneBtn;return;}
   el.innerHTML=doneBtn+list.map(t=>{
     const tc=getTC(t.teacher);
@@ -1457,7 +1457,7 @@ function setProjectFilter(f) {
     var isActive = label === f || (f==='すべて' && b.id==='pf-all');
     b.classList.toggle('active', isActive);
     if (isActive) {
-      var sc = f==='すべて'?{bg:'#6366f1',text:'#fff'}:(PROJECT_STATUS_COLORS[f]||{bg:'#6366f1',text:'#fff'});
+      var sc = f==='すべて'?{bg:'#7b7bff',text:'#fff'}:(PROJECT_STATUS_COLORS[f]||{bg:'#7b7bff',text:'#fff'});
       b.style.background=sc.bg; b.style.color=sc.text; b.style.borderColor=sc.bg;
     } else { b.style.background=''; b.style.color=''; b.style.borderColor=''; }
   });
@@ -2256,11 +2256,11 @@ function notifyTodaySchedules() {
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button onclick="closeDBSettings()" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text-2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">キャンセル</button>
-      <button onclick="saveDBSettings()" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;background:#ccccff;color:#3a3a6e;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">保存</button>
+      <button onclick="saveDBSettings()" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--accent-bg);color:var(--accent-text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">保存</button>
     </div>
   </div>
 </div>
 
-<div id="undo-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#3a3a6e;color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-family:inherit;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;"></div>
+<div id="undo-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent-text);color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-family:inherit;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;"></div>
 </body>
 </html>
