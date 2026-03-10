@@ -1326,23 +1326,23 @@ renderList = function() {
     var dow = d.getDay();
     var dowName = DAYS[dow];
     var dowClass = dow===0?'sun':dow===6?'sat':'';
-    var numColor = dow===0?'#e05555':dow===6?'#5577dd':s.color;
+    var numColor = dow===0?'#e05555':dow===6?'#5577dd':s.textColor;
     var timeStr = s.timeStart ? s.timeStart + (s.timeEnd ? ' – '+s.timeEnd : '') : '';
-    var bgColor = hexToRgba(s.color, 0.12);
-    return '<div class="sched-item" style="border-left-color:'+s.color+';background:'+bgColor+';" onclick="openEditPopup(\''+s.id+'\',event)">'
+    var bgColor = s.color;
+    return '<div class="sched-item" style="border-left-color:'+s.textColor+';background:'+bgColor+';" onclick="openEditPopup(\''+s.id+'\',event)">'
       +'<div class="sched-item-left">'
       +'<div class="sched-date-col">'
       +'<div class="sched-day-num" style="color:'+numColor+'">'+d.getDate()+'</div>'
-      +'<div class="sched-day-name '+dowClass+'">'+dowName+'</div>'
+      +'<div class="sched-day-name '+dowClass+'" style="color:'+(dow===0?'#e05555':dow===6?'#5577dd':s.textColor)+'">'+dowName+'</div>'
       +'</div>'
-      +'<div class="sched-divider"></div>'
+      +'<div class="sched-divider" style="background:'+s.textColor+';opacity:0.2;"></div>'
       +'<div class="sched-body">'
       +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;">'
-      +'<span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:'+s.color+';color:'+s.textColor+'">'+s.teacher+'</span>'
+      +'<span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:'+s.textColor+';color:'+s.color+'">'+s.teacher+'</span>'
       +(cc?'<span class="sched-tag" style="background:'+cc.bg+';color:'+cc.text+'">'+s.content+'</span>':'')
       +'</div>'
-      +(timeStr?'<div class="sched-time">'+timeStr+'</div>':'')
-      +(s.memo?'<div class="sched-memo" style="margin-top:2px;">'+s.memo+'</div>':'')
+      +(timeStr?'<div class="sched-time" style="color:'+s.textColor+'">'+timeStr+'</div>':'')
+      +(s.memo?'<div class="sched-memo" style="margin-top:2px;color:'+s.textColor+';opacity:0.7;">'+s.memo+'</div>':'')
       +''
       +'</div>'
       +'</div>'
