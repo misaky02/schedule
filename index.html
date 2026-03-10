@@ -676,10 +676,10 @@ async function loadSchedules() {
   try {
     const {year, month} = getCurrentYM();
     const startOfMonth = `${year}-${String(month+1).padStart(2,'0')}-01`;
-    const endOfMonth = new Date(year, month+1, 0);
-    const endStr = fmt(endOfMonth);
+    // 今後1週間も確実に含むため、取得範囲を広げる
+    const fetchStart = [fmt(new Date()), startOfMonth].sort()[0];
     const data = await notionAPI('POST', `/databases/${SCHEDULE_DB_ID}/query`, {
-      filter: { property: '日付', date: { on_or_after: startOfMonth } },
+      filter: { property: '日付', date: { on_or_after: fetchStart } },
       sorts: [{ property: '日付', direction: 'ascending' }]
     });
     schedules = data.results.map(p => {
