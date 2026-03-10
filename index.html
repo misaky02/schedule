@@ -7,7 +7,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f4f8; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f4f8; height: 100vh; overflow: hidden; }
 
   /* HEADER */
   .header {
@@ -149,6 +149,20 @@
 </head>
 <body>
 
+<div id="pin-screen" style="position:fixed;inset:0;background:#f0f4f8;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:40px;box-shadow:0 20px 50px rgba(0,0,0,0.15);text-align:center;width:280px">
+    <div style="font-size:32px;margin-bottom:8px">🔒</div>
+    <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px">月間スケジュール</div>
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:24px">PINコードを入力してください</div>
+    <input type="password" id="pin-input" maxlength="6" placeholder="••••"
+      style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1e293b"
+      onkeydown="if(event.key==='Enter')checkPin()">
+    <div id="pin-error" style="color:#ef4444;font-size:12px;margin-top:8px;height:16px"></div>
+    <button onclick="checkPin()" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
+  </div>
+</div>
+
+<div id="main-content" style="display:none;flex-direction:column;height:100vh">
 <div class="header">
   <h1>📅 月間スケジュール</h1>
   <div class="month-nav">
@@ -618,6 +632,23 @@ renderFilterTabs();
 renderTodoFilterTabs();
 loadSchedules();
 loadTodos();
+
+// ===== PIN LOCK =====
+const CORRECT_PIN = "1234"; // ← ここでPINを変更できます
+function checkPin() {
+  const input = document.getElementById('pin-input').value;
+  if (input === CORRECT_PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+  } else {
+    document.getElementById('pin-error').textContent = 'PINコードが違います';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pin-input').focus();
+});
 </script>
 
 <div id="loading" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.7);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
@@ -625,5 +656,5 @@ loadTodos();
   <div style="font-size:13px;color:#6366f1;font-weight:700;">Notionと同期中...</div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-</body>
+</div></body>
 </html>
