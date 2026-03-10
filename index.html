@@ -506,7 +506,7 @@ function renderCalendar() {
       var inner=isStart
         ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+s.timeStart+' '+s.teacher+(s.content?' ['+s.content+']':'')+'</span>')
         :('<span style="opacity:0.6">'+s.teacher+'</span>');
-      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">'+inner+'</div>';
+      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" data-id="'+s.id+'" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();openEditPopup(this.dataset.id,event)">'+inner+'</div>';
     }
     if(dayEvents.length>maxShow){
       evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
