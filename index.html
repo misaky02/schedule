@@ -84,6 +84,8 @@
   }
   .event-chip:hover { opacity: 0.75; }
   .event-chip.multi-day { border-radius: 0; width: calc(100% + 2px); }
+  .event-chip[draggable] { cursor: grab; }
+  .cal-day.drag-over { background: var(--accent-dim) !important; outline: 2px dashed var(--accent); }
   .event-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; opacity: 0.8; }
   .more-badge { font-size: 9px; color: var(--text-3); padding: 1px 5px; cursor: pointer; font-family: 'JetBrains Mono', monospace; }
   .cal-day.holiday-bg { background: var(--holiday-bg); }
@@ -506,12 +508,12 @@ function renderCalendar() {
       var inner=isStart
         ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+s.timeStart+' '+s.teacher+(s.content?' ['+s.content+']':'')+'</span>')
         :('<span style="opacity:0.6">'+s.teacher+'</span>');
-      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" data-id="'+s.id+'" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();openEditPopup(this.dataset.id,event)">'+inner+'</div>';
+      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" data-id="'+s.id+'" draggable="true" onclick="event.stopPropagation();openEditPopup(this.dataset.id,event)" ondragstart="onChipDragStart(event,this.dataset.id,this.dataset.date)">'+inner+'</div>';
     }
     if(dayEvents.length>maxShow){
       evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
     }
-    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)" ondblclick="openQuickAdd(this.dataset.date,event)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
+    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)" ondblclick="openQuickAdd(this.dataset.date,event)" ondragover="calDragOver(event,this)" ondragleave="calDragLeave(this)" ondrop="calDrop(event,this)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
   }
   document.getElementById('cal-body').innerHTML=html;
 }
@@ -575,6 +577,35 @@ async function notionAPI(method, endpoint, body) {
     }
   }
   throw lastErr;
+}
+
+// ===== ドラッグ移動 =====
+var _dragId = '';
+var _dragOrigDate = '';
+function calDragOver(e, el) { e.preventDefault(); el.classList.add('drag-over'); }
+function calDragLeave(el) { el.classList.remove('drag-over'); }
+function calDrop(e, el) { el.classList.remove('drag-over'); onDayDrop(e, el.dataset.date); }
+function onChipDragStart(e, id, date) {
+  _dragId = id;
+  _dragOrigDate = date;
+  e.dataTransfer.effectAllowed = 'move';
+}
+async function onDayDrop(e, newDate) {
+  e.preventDefault();
+  if (!_dragId || newDate === _dragOrigDate) return;
+  var s = schedules.find(function(x){ return x.id === _dragId; });
+  if (!s) return;
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', '/pages/' + _dragId, {
+      properties: {
+        '日付': { date: { start: newDate, end: null } },
+      }
+    });
+    await loadSchedules();
+  } catch(e) { alert('移動に失敗しました: ' + e.message); }
+  setLoading(false);
+  _dragId = '';
 }
 
 // ===== スケジュール編集ポップアップ =====
