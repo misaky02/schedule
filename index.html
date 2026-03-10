@@ -319,6 +319,35 @@
   </div>
 </div>
 
+<!-- EDIT POPUP -->
+<div id="edit-popup" class="quick-popup" style="display:none;">
+  <div class="quick-popup-title">
+    <span>スケジュールを編集</span>
+    <button onclick="closeEditPopup()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
+  </div>
+  <input type="date" id="ep-date">
+  <div class="quick-popup-row">
+    <input type="time" id="ep-start">
+    <input type="time" id="ep-end">
+  </div>
+  <select id="ep-teacher">
+    <option value="">タグを選択</option>
+    <option>小畑先生</option><option>山森先生</option><option>あさ稲先生</option>
+    <option>畠先生</option><option>壱先生</option><option>熊雪先生</option>
+    <option>編集部予定</option><option>プライベート</option>
+  </select>
+  <select id="ep-content">
+    <option value="">内容（任意）</option>
+    <option>告知</option><option>締切</option><option>イベント・フェア</option>
+  </select>
+  <input type="text" id="ep-url" placeholder="URL（任意）">
+  <input type="text" id="ep-memo" placeholder="メモ（任意）">
+  <div class="quick-popup-btns">
+    <button class="btn-quick-cancel" onclick="closeEditPopup()">キャンセル</button>
+    <button class="btn-quick-save" onclick="saveEditPopup()">保存</button>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -423,34 +452,15 @@ function renderTodoList() {
       +'<div class="todo-text'+(t.done?' done':'')+'">'+t.text+'</div>'
       +'<div class="todo-meta">'
       +(t.teacher?'<span style="font-size:10px;font-weight:700;color:'+tc.text+'">'+t.teacher+'</span>':'')
+      +(t.due?'<span style="font-size:9.5px;color:var(--text-3);font-family:JetBrains Mono,monospace;">締切: '+t.due+'</span>':'')
+      +(t.memo?'<span style="font-size:9.5px;color:var(--text-2);">'+t.memo+'</span>':'')
       +'</div></div>'
-      +'<button class="btn-del" onclick="deleteTodo(\'' +t.id+ '\')">&#x2715;</button>'
+      +'<button class="btn-del" onclick="deleteTodo(this.dataset.id)" data-id="'+t.id+'">&#x2715;</button>'
       +'</div>';
   }).join('');
 }
 
-// List
-function renderList() {
-  const el=document.getElementById('schedule-list');
-  const today=fmt(new Date());
-  const week=fmt(new Date(Date.now()+7*24*60*60*1000));
-  let list=schedules.filter(s=>s.date>=today&&s.date<=week);
-  if(listFilter!=='すべて') list=list.filter(s=>s.teacher===listFilter);
-  list.sort((a,b)=>(a.date+a.timeStart).localeCompare(b.date+b.timeStart));
-  if(!list.length){el.innerHTML='<div class="no-item">予定はありません</div>';return;}
-  el.innerHTML=list.map(s=>{
-    const cc=s.content?CONTENT_COLORS[s.content]:null;
-    return `<div class="sched-item" style="border-color:${s.color};background:${s.color}55">
-      <div style="min-width:0">
-        <div class="sched-title" style="color:${s.textColor}">${s.teacher}</div>
-        ${cc?`<span class="sched-tag" style="background:${cc.bg};color:${cc.text}">${s.content}</span>`:''}
-        <div class="sched-sub">${s.date} ${s.timeStart} 〜 ${s.dateEnd&&s.dateEnd!==s.date?s.dateEnd+' ':''} ${s.timeEnd||''}</div>
-        ${s.memo?`<div class="sched-sub">${s.memo}</div>`:''}
-      </div>
-      <button class="btn-del" onclick="deleteSchedule('${s.id}')">&times;</button>
-    </div>`;
-  }).join('');
-}
+
 
 // Calendar
 function renderCalendar() {
@@ -567,6 +577,65 @@ async function notionAPI(method, endpoint, body) {
   throw lastErr;
 }
 
+// ===== スケジュール編集ポップアップ =====
+var _editId = '';
+function openEditPopup(id, e) {
+  e.stopPropagation();
+  var s = schedules.find(function(x){ return x.id === id; });
+  if (!s) return;
+  _editId = id;
+  document.getElementById('ep-date').value = s.date;
+  document.getElementById('ep-start').value = s.timeStart || '';
+  document.getElementById('ep-end').value = s.timeEnd || '';
+  document.getElementById('ep-teacher').value = s.teacher || '';
+  document.getElementById('ep-content').value = s.content || '';
+  document.getElementById('ep-url').value = s.url || '';
+  document.getElementById('ep-memo').value = s.memo || '';
+  var popup = document.getElementById('edit-popup');
+  var x = Math.min(e.clientX, window.innerWidth - 300);
+  var y = Math.min(e.clientY, window.innerHeight - 400);
+  popup.style.left = x + 'px';
+  popup.style.top = y + 'px';
+  popup.style.display = 'flex';
+  setTimeout(function(){ document.addEventListener('click', _epOutside); }, 100);
+}
+function _epOutside(e) {
+  var popup = document.getElementById('edit-popup');
+  if (!popup.contains(e.target)) closeEditPopup();
+}
+function closeEditPopup() {
+  document.getElementById('edit-popup').style.display = 'none';
+  document.removeEventListener('click', _epOutside);
+}
+async function saveEditPopup() {
+  var date = document.getElementById('ep-date').value;
+  var start = document.getElementById('ep-start').value;
+  var end = document.getElementById('ep-end').value;
+  var teacher = document.getElementById('ep-teacher').value;
+  var content = document.getElementById('ep-content').value;
+  var url = document.getElementById('ep-url').value.trim();
+  var memo = document.getElementById('ep-memo').value.trim();
+  if (!date || !teacher) { alert('日付とタグは必須です'); return; }
+  closeEditPopup();
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', '/pages/' + _editId, {
+      properties: {
+        '名前': { title: [{ text: { content: teacher + ' ' + date } }] },
+        '日付': { date: { start: date, end: null } },
+        '開始時間': { rich_text: [{ text: { content: start } }] },
+        ...(end ? { '終了時間': { rich_text: [{ text: { content: end } }] } } : {}),
+        '先生名': { select: { name: teacher } },
+        ...(content ? { '内容': { select: { name: content } } } : {}),
+        ...(url ? { 'URL': { url: url } } : {}),
+        ...(memo ? { 'メモ': { rich_text: [{ text: { content: memo } }] } } : {}),
+      }
+    });
+    await loadSchedules();
+  } catch(e) { alert('保存に失敗しました: ' + e.message); }
+  setLoading(false);
+}
+
 // ===== スケジュール =====
 async function loadSchedules() {
   try {
@@ -593,6 +662,7 @@ async function loadSchedules() {
         teacher,
         content: props['内容']?.select?.name || '',
         memo: props['メモ']?.rich_text?.[0]?.plain_text || '',
+        url: props['URL']?.url || '',
         color: tc.bg, textColor: tc.text
       };
     });
@@ -711,13 +781,17 @@ function setLoading(on) {
 }
 
 // Init
-renderFilterTabs();
-renderTodoFilterTabs();
-renderCalendar();
-renderList();
-loadSchedules();
-loadTodos();
-setTimeout(notifyTodaySchedules, 2000);
+document.addEventListener('DOMContentLoaded', function() {
+  renderFilterTabs();
+  renderTodoFilterTabs();
+  renderCalendar();
+  renderList();
+  loadSchedules();
+  loadTodos();
+  setTimeout(notifyTodaySchedules, 2000);
+  var pi = document.getElementById("pin-input");
+  if(pi) pi.focus();
+});
 
 // ===== クイック追加ポップアップ =====
 var _qpDate = '';
@@ -814,8 +888,7 @@ function toggleCollapse(id, titleEl) {
   }
 }
 
-// ===== 検索対応 renderList上書き =====
-var _origRenderList = renderList;
+// List
 renderList = function() {
   var el = document.getElementById('schedule-list');
   var today = fmt(new Date());
@@ -894,9 +967,7 @@ function checkPin() {
     document.getElementById('pin-input').focus();
   }
 }
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('pin-input').focus();
-});
+
 </script>
 
 <div id="loading" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.7);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
