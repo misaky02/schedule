@@ -60,7 +60,7 @@
   .cal-body {
     display: grid; grid-template-columns: repeat(7,1fr);
     border-left: 1px solid var(--border); border-top: 1px solid var(--border);
-    overflow-y: auto; flex: 1; align-content: start;
+    overflow-y: auto; flex: 0 0 auto; align-content: start;
   }
   .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 76px; padding: 5px; background: var(--surface); transition: background 0.1s; }
   .cal-day.other-month { background: var(--bg); }
@@ -199,7 +199,7 @@
   .btn-quick-cancel { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border) !important; }
   .btn-quick-cancel:hover { background: var(--border); }
 
-  .week-section { border-top: 1px solid var(--border); padding: 8px 16px 10px; background: var(--surface); }
+  .week-section { border-top: 1px solid var(--border); margin-top: 12px; padding: 14px 16px 10px; background: var(--surface); flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
   /* MODAL */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
   .modal { background: var(--surface); border-radius: var(--radius); padding: 22px; width: min(380px,95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
@@ -314,7 +314,7 @@
     <option>告知</option><option>締切</option><option>フェア</option>
   </select>
   <input type="text" id="qp-url" placeholder="URL（任意）">
-  <input type="text" id="qp-memo" placeholder="メモ（任意）">
+  <textarea id="qp-memo" placeholder="メモ（任意）" style="resize:vertical;min-height:56px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;width:100%;transition:border-color 0.15s;"></textarea>
   <div class="quick-popup-btns">
     <button class="btn-quick-cancel" onclick="closeQuickAdd()">キャンセル</button>
     <button class="btn-quick-save" onclick="saveQuickAdd()">＋ 追加</button>
@@ -344,7 +344,7 @@
     <option>告知</option><option>締切</option><option>フェア</option>
   </select>
   <input type="text" id="ep-url" placeholder="URL（任意）">
-  <input type="text" id="ep-memo" placeholder="メモ（任意）">
+  <textarea id="ep-memo" placeholder="メモ（任意）" style="resize:vertical;min-height:56px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;width:100%;transition:border-color 0.15s;"></textarea>
   <div class="quick-popup-btns">
     <button class="btn-quick-cancel" onclick="closeEditPopup()">キャンセル</button>
     <button class="btn-quick-save" onclick="saveEditPopup()">保存</button>
@@ -702,7 +702,6 @@ async function loadSchedules() {
         color: tc.bg, textColor: tc.text
       };
     });
-    console.log("取得件数:", schedules.length, schedules.map(function(s){return s.date+" "+s.title;}));
     renderCalendar(); renderList();
   } catch(e) { console.error('スケジュール読み込みエラー', e); }
 }
@@ -929,16 +928,22 @@ function toggleCollapse(id, titleEl) {
 // List
 renderList = function() {
   var el = document.getElementById('schedule-list');
-  var today = fmt(new Date());
-  var week = fmt(new Date(Date.now() + 7*24*60*60*1000));
+  // 今週の月曜日から次の日曜日までを表示
+  var now = new Date();
+  var dow = now.getDay();
+  var monday = new Date(now); monday.setDate(now.getDate() - (dow===0?6:dow-1));
+  var sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  var weekStart = fmt(monday);
+  var weekEnd = fmt(sunday);
   var q = (document.getElementById('search-input')||{value:''}).value.trim().toLowerCase();
-  var list = schedules.filter(function(s){ return s.date >= today && s.date <= week; });
+  var list = schedules.filter(function(s){ return s.date >= weekStart && s.date <= weekEnd; });
   if(listFilter !== 'すべて') list = list.filter(function(s){ return s.teacher === listFilter; });
   if(q) list = list.filter(function(s){
     return (s.teacher+s.content+s.memo+s.date).toLowerCase().includes(q);
   });
   list.sort(function(a,b){ return (a.date+a.timeStart).localeCompare(b.date+b.timeStart); });
-  console.log("週間リスト件数:", list.length, "today:", today, "week:", week);
+  console.log("週間リスト件数:", list.length, "weekStart:", weekStart, "weekEnd:", weekEnd);
+  console.log("全スケジュール:", schedules.map(function(s){return {date:s.date,title:s.title,ok:(s.date>=weekStart&&s.date<=weekEnd)};}));
   if(!list.length){ el.innerHTML='<div class="no-item">予定はありません</div>'; return; }
   el.innerHTML = list.map(function(s){
     var cc = s.content==='告知'?'#dbeafe':s.content==='締切'?'#fee2e2':s.content==='フェア'?'#dcfce7':'#f1f5f9';
