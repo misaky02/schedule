@@ -330,25 +330,27 @@ function setTodoFilter(t) { todoFilter=t; renderTodoFilterTabs(); renderTodoList
 
 // addTodo, toggleTodo, deleteTodo are handled by Notion version below
 
+let showDone = false;
 function renderTodoList() {
   const el=document.getElementById('todo-list');
   let list=todos;
   if(todoFilter!=='すべて') list=list.filter(t=>t.teacher===todoFilter);
-  list=[...list.filter(t=>!t.done),...list.filter(t=>t.done)];
-  if(!list.length){el.innerHTML='<div class="no-item">TODOはありません</div>';return;}
-  el.innerHTML=list.map(t=>{
+  const doneCount = list.filter(t=>t.done).length;
+  if(!showDone) list=list.filter(t=>!t.done);
+  else list=[...list.filter(t=>!t.done),...list.filter(t=>t.done)];
+  const doneBtn = doneCount>0 ? `<button onclick="showDone=!showDone;renderTodoList()" style="font-size:10px;color:#6366f1;background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">${showDone?'完了済みを隠す':'完了済みを表示 ('+doneCount+')'}</button>` : '';
+  if(!list.length){el.innerHTML='<div class="no-item">TODOはありません</div>'+doneBtn;return;}
+  el.innerHTML=doneBtn+list.map(t=>{
     const tc=getTC(t.teacher);
-
     return `<div class="todo-item" style="border-color:${tc.bg};background:${tc.bg}44">
-      <input type="checkbox" class="todo-check" ${t.done?'checked':''} onchange="toggleTodo(${t.id})">
+      <input type="checkbox" class="todo-check" ${t.done?'checked':''} onchange="toggleTodo('${t.id}')">
       <div style="flex:1;min-width:0">
         <div class="todo-text${t.done?' done':''}">${t.text}</div>
         <div class="todo-meta">
           ${t.teacher?`<span style="font-size:10px;font-weight:700;color:${tc.text}">${t.teacher}</span>`:''}
-
         </div>
       </div>
-      <button class="btn-del" onclick="deleteTodo('${t.id}')">&times;</button>
+      <button class="btn-del" onclick="deleteTodo('${t.id}')">✕</button>
     </div>`;
   }).join('');
 }
