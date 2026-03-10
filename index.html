@@ -520,7 +520,7 @@ function renderCalendar() {
     if(dayEvents.length>maxShow){
       evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
     }
-    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" ondblclick="openQuickAdd(this.dataset.date,event)" ondragover="calDragOver(event,this)" ondragleave="calDragLeave(this)" ondrop="calDrop(event,this)" onmousedown="rangeDragStart(event,this.dataset.date)" onmouseenter="rangeDragEnter(event,this.dataset.date)" onmouseup="rangeDragEnd(event,this.dataset.date)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
+    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" ondblclick="openQuickAdd(this.dataset.date,event)" ondragover="calDragOver(event,this)" ondragleave="calDragLeave(this)" ondrop="calDrop(event,this)" onmousedown="rangeDragStart(event,this.dataset.date)" onmouseenter="rangeDragEnter(event,this.dataset.date)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
   }
   document.getElementById('cal-body').innerHTML=html;
 }
@@ -607,22 +607,6 @@ function rangeDragEnter(e, date) {
   updateRangeHighlight();
 }
 
-function rangeDragEnd(e, date) {
-  if (!_rangeDragging) return;
-  _rangeDragging = false;
-  _rangeEnd = date;
-  updateRangeHighlight();
-  var start = _rangeStart < _rangeEnd ? _rangeStart : _rangeEnd;
-  var end = _rangeStart < _rangeEnd ? _rangeEnd : _rangeStart;
-  if (start === end) {
-    // 同じ日はシングルクリック扱い → 新規ポップアップ
-    openQuickAdd(start, e);
-  } else {
-    // 複数日選択 → 期間ポップアップ
-    openRangeQuickAdd(start, end, e);
-  }
-}
-
 function updateRangeHighlight() {
   var start = _rangeStart < _rangeEnd ? _rangeStart : _rangeEnd;
   var end = _rangeStart < _rangeEnd ? _rangeEnd : _rangeStart;
@@ -636,13 +620,21 @@ function updateRangeHighlight() {
   });
 }
 
-document.addEventListener('mouseup', function() {
-  if (_rangeDragging) {
-    _rangeDragging = false;
-    document.querySelectorAll('.cal-day.range-select').forEach(function(el){
-      el.classList.remove('range-select');
-    });
+document.addEventListener('mouseup', function(e) {
+  if (!_rangeDragging) return;
+  _rangeDragging = false;
+  var start = _rangeStart < _rangeEnd ? _rangeStart : _rangeEnd;
+  var end   = _rangeStart < _rangeEnd ? _rangeEnd   : _rangeStart;
+  document.querySelectorAll('.cal-day.range-select').forEach(function(el){
+    el.classList.remove('range-select');
+  });
+  if (!start) return;
+  if (start === end) {
+    openQuickAdd(start, e);
+  } else {
+    openRangeQuickAdd(start, end, e);
   }
+  _rangeStart = ''; _rangeEnd = '';
 });
 
 function openRangeQuickAdd(start, end, e) {
