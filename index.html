@@ -56,6 +56,64 @@
   .week-section { border-top: 1px solid var(--border); padding: 10px 16px 10px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
   .week-section .sec-block { display: flex; flex-direction: column; gap: 8px; }
   .week-section .sched-list { overflow-y: auto; max-height: 28vh; display: flex; flex-direction: column; gap: 6px; }
+
+  /* BOTTOM SPLIT */
+  .bottom-split { display: grid; grid-template-columns: 1fr 260px; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
+  .project-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .project-panel-inner { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+  .project-item { padding: 8px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--accent); background: var(--surface2); display: flex; align-items: flex-start; gap: 8px; cursor: pointer; transition: background 0.1s; }
+  .project-item:hover { background: var(--accent-dim); }
+  .project-item-body { flex: 1; min-width: 0; }
+  .project-item-name { font-size: 11px; font-weight: 700; color: var(--text); }
+  .project-item-meta { font-size: 9.5px; color: var(--text-2); margin-top: 2px; }
+  .project-status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-top: 3px; }
+  .project-add-row { display: flex; gap: 5px; }
+  .project-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
+  .project-add-row input:focus { border-color: var(--accent); }
+  .btn-project-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+  /* PROJECT DETAIL PAGE */
+  .project-detail-page {
+    position: fixed; inset: 0; z-index: 400;
+    background: var(--bg); display: flex; flex-direction: column;
+    animation: slideInUp 0.2s ease;
+  }
+  @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .pd-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 20px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .pd-back { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 12px; color: var(--text-2); font-family: inherit; display: flex; align-items: center; gap: 4px; transition: all 0.15s; }
+  .pd-back:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .pd-title-area { flex: 1; }
+  .pd-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .pd-subtitle { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+  .pd-body { flex: 1; display: grid; grid-template-columns: 1fr 300px; overflow: hidden; gap: 0; }
+  .pd-main { padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+  .pd-side { background: var(--surface); border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .pd-section-title { font-size: 11px; font-weight: 700; color: var(--text-2); letter-spacing: 0.05em; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  /* タスクリスト */
+  .task-item { display: flex; align-items: flex-start; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); transition: background 0.1s; }
+  .task-item:hover { background: var(--surface2); }
+  .task-check { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 1px; appearance: none; -webkit-appearance: none; position: relative; transition: all 0.15s; background: var(--surface2); }
+  .task-check:checked { background: var(--accent); border-color: var(--accent); }
+  .task-check:checked::after { content: ''; position: absolute; left: 3px; top: 1px; width: 5px; height: 8px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg); }
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .task-name.done { text-decoration: line-through; color: var(--text-3); }
+  .task-meta { display: flex; gap: 6px; margin-top: 3px; flex-wrap: wrap; align-items: center; }
+  .task-due { font-size: 9.5px; color: var(--text-3); font-family: 'JetBrains Mono', monospace; }
+  .task-due.overdue { color: #e05555; font-weight: 700; }
+  .task-assignee { font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
+  .task-add-area { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .task-add-row { display: flex; gap: 6px; }
+  .task-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
+  .task-add-row input:focus { border-color: var(--accent); }
+  .btn-task-add { padding: 7px 12px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  /* プロジェクト情報編集 */
+  .pd-info-row { display: flex; flex-direction: column; gap: 3px; }
+  .pd-info-label { font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.05em; }
+  .pd-info-val { font-size: 12px; color: var(--text); }
   .dow-header {
     display: grid; grid-template-columns: repeat(7,1fr);
     background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -260,23 +318,65 @@
       <div class="dow-cell sun">日</div>
     </div>
     <div class="cal-body" id="cal-body"></div>
-    <!-- 今後1週間の予定 -->
-    <div class="week-section" id="week-section">
-<div class="sec-block">
-      <div class="sec-title week-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.2" fill="currentColor"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/><circle cx="16" cy="14" r="1.2" fill="currentColor"/></svg><span id="week-label">今後1週間の予定</span></span>
-        <span style="display:inline-flex;align-items:center;gap:3px;">
-          <button onclick="changeWeek(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="前の週">‹</button>
-          <button onclick="changeWeek(0)" id="btn-week-today" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:9px;color:var(--text-2);font-family:inherit;line-height:1.4;">今週</button>
-          <button onclick="changeWeek(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="次の週">›</button>
-        </span>
+    <!-- 下部：週間予定＋プロジェクト -->
+    <div class="bottom-split">
+      <!-- 今後1週間の予定 -->
+      <div class="week-section" id="week-section">
+        <div class="sec-block">
+          <div class="sec-title week-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.2" fill="currentColor"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/><circle cx="16" cy="14" r="1.2" fill="currentColor"/></svg><span id="week-label">今後1週間の予定</span></span>
+            <span style="display:inline-flex;align-items:center;gap:3px;">
+              <button onclick="changeWeek(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="前の週">‹</button>
+              <button onclick="changeWeek(0)" id="btn-week-today" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:9px;color:var(--text-2);font-family:inherit;line-height:1.4;">今週</button>
+              <button onclick="changeWeek(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="次の週">›</button>
+            </span>
+          </div>
+          <div class="filter-tabs" id="filter-tabs"></div>
+          <div class="filter-tabs" id="filter-content-tabs" style="margin-top:4px;"></div>
+          <div class="sched-list" id="schedule-list"></div>
+        </div>
       </div>
-      <div class="filter-tabs" id="filter-tabs"></div>
-      <div class="filter-tabs" id="filter-content-tabs" style="margin-top:4px;"></div>
-      <div class="sched-list" id="schedule-list"></div>
-    </div>
-    </div>
-  </div>
+
+      <!-- プロジェクト -->
+      <div class="project-panel">
+        <div class="project-panel-inner">
+          <div class="sec-title" style="padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:inline-flex;align-items:center;gap:5px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/><rect x="1" y="4" width="4" height="4" rx="1"/><rect x="1" y="9" width="4" height="4" rx="1"/><rect x="1" y="14" width="4" height="4" rx="1"/></svg>
+              プロジェクト
+            </span>
+          </div>
+          <div class="project-add-row">
+            <input type="text" id="project-text" placeholder="プロジェクト名..." onkeydown="if(event.key==='Enter')addProject()">
+            <button class="btn-project-add" onclick="addProject()">追加</button>
+          </div>
+          <div style="display:flex;gap:5px;margin-top:-2px;">
+            <select id="project-status" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;">
+              <option value="進行中">進行中</option>
+              <option value="未着手">未着手</option>
+              <option value="完了">完了</option>
+              <option value="保留">保留</option>
+            </select>
+            <select id="project-teacher" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;">
+              <option value="">タグなし</option>
+              <option>小畑先生</option><option>山森先生</option><option>あさ稲先生</option>
+              <option>畠先生</option><option>壱先生</option><option>熊雪先生</option>
+              <option>編集部予定</option><option>プライベート</option>
+            </select>
+          </div>
+          <textarea id="project-memo" placeholder="メモ（任意）" style="width:100%;resize:none;height:44px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;box-sizing:border-box;"></textarea>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;" id="project-status-filter">
+            <button class="ftab active" id="pf-all" onclick="setProjectFilter('すべて')" style="background:#6366f1;color:#fff;border-color:#6366f1;">すべて</button>
+            <button class="ftab" onclick="setProjectFilter('進行中')">進行中</button>
+            <button class="ftab" onclick="setProjectFilter('未着手')">未着手</button>
+            <button class="ftab" onclick="setProjectFilter('完了')">完了</button>
+            <button class="ftab" onclick="setProjectFilter('保留')">保留</button>
+          </div>
+          <div id="project-list" style="display:flex;flex-direction:column;gap:5px;overflow-y:auto;max-height:22vh;"></div>
+        </div>
+      </div>
+    </div><!-- /bottom-split -->
+  </div><!-- /cal-wrap -->
 
   <!-- RIGHT PANEL -->
   <div class="panel">
@@ -1157,6 +1257,179 @@ async function deleteTodo(id) {
   setLoading(false);
 }
 
+// ===== プロジェクト =====
+var projects = [];
+var nextPID = 1;
+var nextTaskID = 1;
+var projectFilter = 'すべて';
+var currentProjectId = null;
+
+const PROJECT_STATUS_COLORS = {
+  '進行中': { bg: '#dbeafe', text: '#1e40af' },
+  '未着手': { bg: '#f1f5f9', text: '#475569' },
+  '完了':   { bg: '#dcfce7', text: '#166534' },
+  '保留':   { bg: '#fef9c3', text: '#854d0e' },
+};
+
+function setProjectFilter(f) {
+  projectFilter = f;
+  document.querySelectorAll('#project-status-filter .ftab').forEach(function(b){
+    var label = b.textContent.trim();
+    var isActive = label === f || (f==='すべて' && b.id==='pf-all');
+    b.classList.toggle('active', isActive);
+    if (isActive) {
+      var sc = f==='すべて'?{bg:'#6366f1',text:'#fff'}:(PROJECT_STATUS_COLORS[f]||{bg:'#6366f1',text:'#fff'});
+      b.style.background = sc.bg; b.style.color = sc.text; b.style.borderColor = sc.bg;
+    } else {
+      b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+    }
+  });
+  renderProjects();
+}
+
+function renderProjects() {
+  var el = document.getElementById('project-list');
+  if (!el) return;
+  var list = projectFilter === 'すべて' ? projects : projects.filter(function(p){ return p.status === projectFilter; });
+  if (!list.length) { el.innerHTML = '<div class="no-item">プロジェクトはありません</div>'; return; }
+  el.innerHTML = list.map(function(p){
+    var sc = PROJECT_STATUS_COLORS[p.status] || PROJECT_STATUS_COLORS['未着手'];
+    var tc = p.teacher ? getTC(p.teacher) : null;
+    var total = p.tasks ? p.tasks.length : 0;
+    var done = p.tasks ? p.tasks.filter(function(t){ return t.done; }).length : 0;
+    var pct = total > 0 ? Math.round(done/total*100) : 0;
+    return '<div class="project-item" style="border-left-color:'+(tc?tc.bg:'var(--accent)')+';" onclick="openProjectDetail(\''+p.id+'\')">'
+      +'<div class="project-item-body">'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">'
+      +'<div class="project-item-name">'+p.name+'</div>'
+      +'<span class="project-status" style="background:'+sc.bg+';color:'+sc.text+'">'+p.status+'</span>'
+      +(tc?'<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;background:'+tc.bg+';color:'+tc.text+'">'+p.teacher+'</span>':'')
+      +'</div>'
+      +(total>0?'<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
+        +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'#22c55e':'var(--accent)')+';border-radius:2px;"></div>'
+        +'</div>'
+        +'<span style="font-size:9px;color:var(--text-3);font-family:JetBrains Mono,monospace;">'+done+'/'+total+'</span>'
+        +'</div>':'')
+      +(p.memo?'<div class="project-item-meta">'+p.memo+'</div>':'')
+      +'</div>'
+      +'<button class="btn-del" onclick="event.stopPropagation();deleteProject(\''+p.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addProject() {
+  var name = document.getElementById('project-text').value.trim();
+  if (!name) { alert('プロジェクト名を入力してください'); return; }
+  var status = document.getElementById('project-status').value;
+  var teacher = document.getElementById('project-teacher').value;
+  var memo = document.getElementById('project-memo').value.trim();
+  projects.push({ id: 'p'+(nextPID++), name: name, status: status, teacher: teacher, memo: memo, tasks: [] });
+  document.getElementById('project-text').value = '';
+  document.getElementById('project-memo').value = '';
+  renderProjects();
+}
+
+function deleteProject(id) {
+  projects = projects.filter(function(p){ return p.id !== id; });
+  renderProjects();
+}
+
+// ===== プロジェクト詳細ページ =====
+function openProjectDetail(id) {
+  currentProjectId = id;
+  var p = projects.find(function(x){ return x.id === id; });
+  if (!p) return;
+  document.getElementById('pd-title').textContent = p.name;
+  var tc = p.teacher ? getTC(p.teacher) : null;
+  document.getElementById('pd-teacher').innerHTML = tc
+    ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:'+tc.bg+';color:'+tc.text+'">'+p.teacher+'</span>'
+    : '<span style="color:var(--text-3)">なし</span>';
+  document.getElementById('pd-memo-edit').value = p.memo || '';
+  document.getElementById('pd-status').value = p.status;
+  renderTaskList();
+  document.getElementById('project-detail-page').style.display = 'flex';
+}
+
+function closeProjectDetail() {
+  document.getElementById('project-detail-page').style.display = 'none';
+  currentProjectId = null;
+  renderProjects();
+}
+
+function updateProjectStatus() {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  p.status = document.getElementById('pd-status').value;
+}
+
+function updateProjectMemo() {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  p.memo = document.getElementById('pd-memo-edit').value;
+}
+
+function renderTaskList() {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  var el = document.getElementById('pd-task-list');
+  var today = fmt(new Date());
+  var total = p.tasks.length;
+  var done = p.tasks.filter(function(t){ return t.done; }).length;
+  var pct = total > 0 ? Math.round(done/total*100) : 0;
+  // 進捗バー更新
+  document.getElementById('pd-progress-bar').style.width = pct+'%';
+  document.getElementById('pd-progress-text').textContent = total > 0 ? done+'/'+total+' 完了 ('+pct+'%)' : 'タスクなし';
+  document.getElementById('pd-stats').textContent = total+'件中 '+done+'件完了';
+  if (!total) { el.innerHTML = '<div class="no-item" style="padding:16px 0;">タスクはありません</div>'; return; }
+  var undone = p.tasks.filter(function(t){ return !t.done; });
+  var doneList = p.tasks.filter(function(t){ return t.done; });
+  var list = [...undone, ...doneList];
+  el.innerHTML = list.map(function(t){
+    var tc2 = t.assignee ? getTC(t.assignee) : null;
+    var isOverdue = t.due && !t.done && t.due < today;
+    return '<div class="task-item">'
+      +'<input type="checkbox" class="task-check" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')">'
+      +'<div class="task-body">'
+      +'<div class="task-name'+(t.done?' done':'')+'">'+t.name+'</div>'
+      +'<div class="task-meta">'
+      +(tc2?'<span class="task-assignee" style="background:'+tc2.bg+';color:'+tc2.text+'">'+t.assignee+'</span>':'')
+      +(t.due?'<span class="task-due'+(isOverdue?' overdue':'')+'">📅 '+t.due+'</span>':'')
+      +'</div>'
+      +'</div>'
+      +'<button class="btn-del" onclick="deleteTask(\''+t.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addTask() {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  var name = document.getElementById('pd-task-input').value.trim();
+  if (!name) return;
+  var assignee = document.getElementById('pd-task-assignee').value;
+  var due = document.getElementById('pd-task-due').value;
+  p.tasks.push({ id: 't'+(nextTaskID++), name: name, assignee: assignee, due: due, done: false });
+  document.getElementById('pd-task-input').value = '';
+  document.getElementById('pd-task-due').value = '';
+  renderTaskList();
+}
+
+function toggleTask(tid) {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  var t = p.tasks.find(function(x){ return x.id === tid; });
+  if (t) t.done = !t.done;
+  renderTaskList();
+}
+
+function deleteTask(tid) {
+  var p = projects.find(function(x){ return x.id === currentProjectId; });
+  if (!p) return;
+  p.tasks = p.tasks.filter(function(x){ return x.id !== tid; });
+  renderTaskList();
+}
+
 // ローディング表示
 function setLoading(on) {
   document.getElementById('loading').style.display = on ? 'flex' : 'none';
@@ -1169,6 +1442,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderTodoFilterTabs();
   renderCalendar();
   renderList();
+  renderProjects();
   loadSchedules();
   loadTodos();
   setTimeout(notifyTodaySchedules, 2000);
@@ -1416,6 +1690,74 @@ function checkPin() {
   <div style="font-size:12px;color:#6b6b8a;font-weight:500;">Notionと同期中...</div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-</div><div id="undo-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#3a3a6e;color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-family:inherit;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;"></div>
+</div><!-- PROJECT DETAIL PAGE -->
+<div id="project-detail-page" class="project-detail-page" style="display:none;">
+  <div class="pd-header">
+    <button class="pd-back" onclick="closeProjectDetail()">← 戻る</button>
+    <div class="pd-title-area">
+      <div class="pd-title" id="pd-title"></div>
+      <div class="pd-subtitle" id="pd-subtitle"></div>
+    </div>
+    <select id="pd-status" onchange="updateProjectStatus()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;">
+      <option value="進行中">進行中</option>
+      <option value="未着手">未着手</option>
+      <option value="完了">完了</option>
+      <option value="保留">保留</option>
+    </select>
+  </div>
+  <div class="pd-body">
+    <!-- メインエリア：タスクリスト -->
+    <div class="pd-main">
+      <div>
+        <div class="pd-section-title">タスク</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:6px;">
+          <span id="pd-progress-text" style="font-size:11px;color:var(--text-2);"></span>
+          <div style="flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div id="pd-progress-bar" style="height:100%;background:var(--accent);border-radius:3px;transition:width 0.3s;width:0%;"></div>
+          </div>
+        </div>
+        <div id="pd-task-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+        <!-- タスク追加 -->
+        <div class="task-add-area">
+          <div class="task-add-row">
+            <input type="text" id="pd-task-input" placeholder="タスクを入力..." onkeydown="if(event.key==='Enter')addTask()">
+            <button class="btn-task-add" onclick="addTask()">追加</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <select id="pd-task-assignee" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;">
+              <option value="">担当者なし</option>
+              <option>小畑先生</option><option>山森先生</option><option>あさ稲先生</option>
+              <option>畠先生</option><option>壱先生</option><option>熊雪先生</option>
+              <option>編集部予定</option><option>プライベート</option>
+            </select>
+            <input type="date" id="pd-task-due" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- サイドエリア：プロジェクト情報 -->
+    <div class="pd-side">
+      <div>
+        <div class="pd-section-title">プロジェクト情報</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+          <div class="pd-info-row">
+            <div class="pd-info-label">タグ</div>
+            <div class="pd-info-val" id="pd-teacher"></div>
+          </div>
+          <div class="pd-info-row">
+            <div class="pd-info-label">メモ</div>
+            <textarea id="pd-memo-edit" style="width:100%;resize:vertical;min-height:72px;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text);font-family:inherit;background:var(--surface2);outline:none;box-sizing:border-box;" oninput="updateProjectMemo()"></textarea>
+          </div>
+          <div class="pd-info-row">
+            <div class="pd-info-label">進捗</div>
+            <div id="pd-stats" style="font-size:12px;color:var(--text);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="undo-toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#3a3a6e;color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;font-family:inherit;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;"></div>
 </body>
 </html>
