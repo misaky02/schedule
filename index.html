@@ -349,6 +349,7 @@
     <button class="btn-quick-cancel" onclick="closeEditPopup()">キャンセル</button>
     <button class="btn-quick-save" onclick="saveEditPopup()">保存</button>
   </div>
+  <button onclick="if(confirm('削除しますか？')){closeEditPopup();deleteSchedule(_editId)}" style="width:100%;padding:7px;border-radius:var(--radius-sm);border:none;background:none;color:#ff6b6b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:2px;">🗑 削除する</button>
 </div>
 
 <!-- MODAL -->
@@ -721,7 +722,7 @@ async function addSchedule() {
     await notionAPI('POST', '/pages', {
       parent: { database_id: SCHEDULE_DB_ID },
       properties: {
-        '名前': { title: [{ text: { content: `${teacher} ${date}` } }] },
+        '名前': { title: [{ text: { content: title || teacher } }] },
         '日付': { date: { start: date, end: dateEnd !== date ? dateEnd : null } },
         '開始時間': { rich_text: [{ text: { content: timeStart } }] },
         ...(timeEnd ? { '終了時間': { rich_text: [{ text: { content: timeEnd } }] } } : {}),
