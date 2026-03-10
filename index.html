@@ -448,11 +448,13 @@ function setTodoFilter(t) { todoFilter=t; renderTodoFilterTabs(); renderTodoList
 let showDone = false;
 function renderTodoList() {
   const el=document.getElementById('todo-list');
-  let list=todos;
-  if(todoFilter!=='すべて') list=list.filter(t=>t.teacher===todoFilter);
+  // フィルター適用（todos配列の順番を維持、再ソートしない）
+  let list=todos.filter(t=>todoFilter==='すべて'||t.teacher===todoFilter);
   const doneCount = list.filter(t=>t.done).length;
-  if(!showDone) list=list.filter(t=>!t.done);
-  else list=[...list.filter(t=>!t.done),...list.filter(t=>t.done)];
+  // 完了済みはshowDoneがtrueのとき末尾へ、falseのとき非表示
+  const undone = list.filter(t=>!t.done);
+  const done   = list.filter(t=>t.done);
+  list = showDone ? [...undone, ...done] : undone;
   const doneBtn = doneCount>0 ? '<button onclick="showDone=!showDone;renderTodoList()" style="font-size:10px;color:#6366f1;background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">'+(showDone?'完了済みを隠す':'完了済みを表示 ('+doneCount+')')+'</button>' : '';
   if(!list.length){el.innerHTML='<div class="no-item">TODOはありません</div>'+doneBtn;return;}
   el.innerHTML=doneBtn+list.map(t=>{
@@ -931,9 +933,7 @@ async function deleteSchedule(id) {
 // ===== TODO =====
 async function loadTodos() {
   try {
-    const data = await notionAPI('POST', `/databases/${TODO_DB_ID}/query`, {
-      sorts: [{ property: '完了', direction: 'ascending' }]
-    });
+    const data = await notionAPI('POST', `/databases/${TODO_DB_ID}/query`, {});
     todos = data.results.map(p => {
       const props = p.properties;
       return {
