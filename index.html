@@ -348,7 +348,7 @@ function renderTodoList() {
 
         </div>
       </div>
-      <button class="btn-del" onclick="deleteTodo(${t.id})">✕</button>
+      <button class="btn-del" onclick="deleteTodo('${t.id}')">✕</button>
     </div>`;
   }).join('');
 }
@@ -371,7 +371,7 @@ function renderList() {
         <div class="sched-sub">${s.date} ${s.timeStart} 〜 ${s.dateEnd&&s.dateEnd!==s.date?s.dateEnd+' ':''} ${s.timeEnd||''}</div>
         ${s.memo?`<div class="sched-sub">${s.memo}</div>`:''}
       </div>
-      <button class="btn-del" onclick="deleteSchedule(${s.id})">✕</button>
+      <button class="btn-del" onclick="deleteSchedule('${s.id}')">✕</button>
     </div>`;
   }).join('');
 }
