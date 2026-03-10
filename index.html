@@ -144,16 +144,26 @@
   .ftab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
 
   /* Schedule list */
-  .sched-list { display: flex; flex-direction: column; gap: 4px; }
+  .sched-list { display: flex; flex-direction: column; gap: 6px; }
   .sched-item {
-    padding: 7px 10px; border-radius: var(--radius-sm); border-left: 3px solid;
-    display: flex; justify-content: space-between; align-items: center; gap: 6px;
-    background: var(--surface2);
+    padding: 8px 10px 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    background: var(--surface2); transition: background 0.1s;
   }
-  .sched-title { font-size: 11px; font-weight: 600; }
-  .sched-sub { font-size: 9.5px; color: var(--text-2); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
-  .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; margin-top: 2px; }
-  .btn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; }
+  .sched-item:hover { background: var(--border); }
+  .sched-item-left { display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 0; }
+  .sched-date-col { display: flex; flex-direction: column; align-items: center; min-width: 34px; flex-shrink: 0; padding-top: 1px; }
+  .sched-day-num { font-size: 17px; font-weight: 700; line-height: 1; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .sched-day-name { font-size: 9px; font-weight: 600; color: var(--text-3); letter-spacing: 0.05em; margin-top: 1px; }
+  .sched-day-name.sun { color: #ff8888; }
+  .sched-day-name.sat { color: #88aaff; }
+  .sched-body { flex: 1; min-width: 0; }
+  .sched-teacher { font-size: 11px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sched-time { font-size: 10px; color: var(--text-2); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+  .sched-meta { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; align-items: center; }
+  .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; }
+  .sched-memo { font-size: 9.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; margin-top: 1px; }
   .btn-del:hover { color: #ff8888; background: rgba(255,100,100,0.1); }
   .no-item { font-size: 11px; color: var(--text-3); text-align: center; padding: 12px 0; }
 
@@ -1272,14 +1282,31 @@ renderList = function() {
   });
   list.sort(function(a,b){ return (a.date+a.timeStart).localeCompare(b.date+b.timeStart); });
   if(!list.length){ el.innerHTML='<div class="no-item">予定はありません</div>'; return; }
+  var DAYS = ['日','月','火','水','木','金','土'];
   el.innerHTML = list.map(function(s){
-    var cc = s.content==='告知'?'#dbeafe':s.content==='締切'?'#fee2e2':s.content==='フェア'?'#dcfce7':'#f1f5f9';
-    var tc2 = s.content==='告知'?'#1e40af':s.content==='締切'?'#991b1b':s.content==='フェア'?'#166534':'#475569';
-    return '<div class="sched-item" style="background:'+s.color+'22;border-left-color:'+s.color+';">'
-      +'<div><div class="sched-title">'+s.date+(s.timeStart?' '+s.timeStart:'')+(s.timeEnd?'–'+s.timeEnd:'')+'</div>'
-      +'<div class="sched-sub">'+s.teacher+(s.content?' / '+s.content:'')+(s.memo?' · '+s.memo:'')+'</div>'
-      +(s.content?'<span class="sched-tag" style="background:'+cc+';color:'+tc2+'">'+s.content+'</span>':'')+'</div>'
-      +'<button class="btn-del" onclick="deleteSchedule(this.dataset.id)" data-id="'+s.id+'">✕</button>'
+    var cc = s.content==='告知'?{bg:'#dbeafe',text:'#1e40af'}:s.content==='締切'?{bg:'#fee2e2',text:'#991b1b'}:s.content==='フェア'?{bg:'#dcfce7',text:'#166534'}:null;
+    var d = new Date(s.date+'T00:00:00');
+    var dow = d.getDay();
+    var dowName = DAYS[dow];
+    var dowClass = dow===0?'sun':dow===6?'sat':'';
+    var timeStr = s.timeStart ? s.timeStart + (s.timeEnd ? ' – '+s.timeEnd : '') : '';
+    var dateLabel = (d.getMonth()+1) + '/' + d.getDate();
+    return '<div class="sched-item" style="border-left-color:'+s.color+';background:'+s.color+'18;" onclick="openEditPopup(\''+s.id+'\',event)">'
+      +'<div class="sched-item-left">'
+      +'<div class="sched-date-col">'
+      +'<div class="sched-day-num" style="color:'+s.color+'">'+d.getDate()+'</div>'
+      +'<div class="sched-day-name '+dowClass+'">'+dowName+'</div>'
+      +'</div>'
+      +'<div class="sched-body">'
+      +'<div class="sched-teacher">'+s.teacher+'</div>'
+      +(timeStr?'<div class="sched-time">🕐 '+timeStr+'</div>':'')
+      +'<div class="sched-meta">'
+      +(cc?'<span class="sched-tag" style="background:'+cc.bg+';color:'+cc.text+'">'+s.content+'</span>':'')
+      +(s.memo?'<span class="sched-memo">'+s.memo+'</span>':'')
+      +'</div>'
+      +'</div>'
+      +'</div>'
+      +'<button class="btn-del" onclick="event.stopPropagation();deleteSchedule(this.dataset.id)" data-id="'+s.id+'">✕</button>'
       +'</div>';
   }).join('');
 };
