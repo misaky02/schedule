@@ -47,9 +47,14 @@
   /* LAYOUT */
   .layout { display: grid; grid-template-columns: 1fr 290px; flex: 1; overflow: hidden; min-height: 0; }
 
+  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); justify-content: flex-start; }
+  .cal-body {
+    display: grid; grid-template-columns: repeat(7,1fr);
+    border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+    overflow-y: hidden; flex: 0 0 auto; align-content: start;
+  }
+  .week-section { border-top: 1px solid var(--border); padding: 12px 16px 10px; background: var(--surface); flex: 0 0 auto; overflow-y: auto; display: flex; flex-direction: column; max-height: 30vh; }
   /* CALENDAR */
-  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
-
   .dow-header {
     display: grid; grid-template-columns: repeat(7,1fr);
     background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -57,12 +62,7 @@
   .dow-cell { text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
   .dow-cell.sun { color: #ff8888; }
   .dow-cell.sat { color: #88aaff; }
-  .cal-body {
-    display: grid; grid-template-columns: repeat(7,1fr);
-    border-left: 1px solid var(--border); border-top: 1px solid var(--border);
-    overflow-y: auto; flex: 0 0 auto; align-content: start;
-  }
-  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 76px; padding: 5px; background: var(--surface); transition: background 0.1s; }
+  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 96px; padding: 5px; background: var(--surface); transition: background 0.1s; }
   .cal-day.other-month { background: var(--bg); }
   .cal-day.today-bg { background: #f0f0ff; }
   .cal-day.holiday-bg { background: var(--surface) !important; }
@@ -202,7 +202,7 @@
   .btn-quick-cancel { background: var(--surface2); color: var(--text-2); border: 1px solid var(--border) !important; }
   .btn-quick-cancel:hover { background: var(--border); }
 
-  .week-section { border-top: 1px solid var(--border); margin-top: 12px; padding: 14px 16px 10px; background: var(--surface); flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .week-section { border-top: 1px solid var(--border); padding: 14px 16px 10px; background: var(--surface); flex: 0 0 auto; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; }
   /* MODAL */
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
   .modal { background: var(--surface); border-radius: var(--radius); padding: 22px; width: min(380px,95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
@@ -231,9 +231,9 @@
 <div id="main-content" style="display:none;flex-direction:column;height:100vh">
 <div class="header" style="display:flex;align-items:center;gap:8px;padding:8px 16px;">
   <div class="month-nav">
-    <button onclick="changeMonth(-1)">‹</button>
+    <button id="btn-prev-month" onclick="changeMonth(-1)" onmouseenter="onNavHover(-1)" onmouseleave="onNavLeave()">‹</button>
     <div class="month-label" id="month-label"></div>
-    <button onclick="changeMonth(1)">›</button>
+    <button id="btn-next-month" onclick="changeMonth(1)" onmouseenter="onNavHover(1)" onmouseleave="onNavLeave()">›</button>
   </div>
 </div>
 
@@ -406,7 +406,7 @@ const DAYS_JA = ['日','月','火','水','木','金','土'];
 let schedules = [], todos = [];
 let nextSID = 1, nextTID = 1;
 let monthOffset = 0;
-let listFilter = 'すべて', todoFilter = 'すべて';
+// listFilters / todoFilters は下のFilter tabs関数内で定義
 
 function getTC(t) { return TEACHER_COLORS[t] || { bg: '#e0f2fe', text: '#0c4a6e' }; }
 function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -419,26 +419,77 @@ function getCurrentYM() {
 function changeMonth(d) { monthOffset+=d; renderCalendar(); renderList(); }
 function goToday() { monthOffset=0; renderCalendar(); renderList(); }
 
-// Filter tabs
+// ===== ホイールスクロールで月移動 =====
+var _wheelTimer = null;
+document.addEventListener('DOMContentLoaded', function() {
+  var calWrap = document.querySelector('.cal-wrap');
+  if (calWrap) {
+    calWrap.addEventListener('wheel', function(e) {
+      // cal-bodyがスクロール可能な場合は無視
+      var calBody = document.getElementById('cal-body');
+      if (calBody && calBody.scrollHeight > calBody.clientHeight) {
+        // スクロールが端に達したときだけ月移動
+        var atTop = calBody.scrollTop <= 0;
+        var atBottom = calBody.scrollTop + calBody.clientHeight >= calBody.scrollHeight - 1;
+        if (!((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom))) return;
+      }
+      e.preventDefault();
+      if (_wheelTimer) return; // 連続発火を防ぐ
+      _wheelTimer = setTimeout(function(){ _wheelTimer = null; }, 400);
+      changeMonth(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+  }
+});
+
+// Filter tabs (複数選択対応)
+let listFilters = ['すべて'];
+let todoFilters = ['すべて'];
+
 function renderFilterTabs() {
   const el = document.getElementById('filter-tabs');
   el.innerHTML = ['すべて',...TEACHERS].map(t => {
     const tc = t==='すべて' ? {bg:'#6366f1',text:'#fff'} : getTC(t);
-    const a = listFilter===t;
+    const a = listFilters.includes(t);
     return `<button class="ftab${a?' active':''}" style="${a?`background:${tc.bg};color:${tc.text};border-color:${tc.bg}`:''}" onclick="setListFilter('${t}')">${t}</button>`;
   }).join('');
 }
-function setListFilter(t) { listFilter=t; renderFilterTabs(); renderList(); renderCalendar(); }
+function setListFilter(t) {
+  if (t === 'すべて') {
+    listFilters = ['すべて'];
+  } else {
+    listFilters = listFilters.filter(x => x !== 'すべて');
+    if (listFilters.includes(t)) {
+      listFilters = listFilters.filter(x => x !== t);
+      if (listFilters.length === 0) listFilters = ['すべて'];
+    } else {
+      listFilters.push(t);
+    }
+  }
+  renderFilterTabs(); renderList(); renderCalendar();
+}
 
 function renderTodoFilterTabs() {
   const el = document.getElementById('todo-filter-tabs');
   el.innerHTML = ['すべて',...TEACHERS].map(t => {
     const tc = t==='すべて' ? {bg:'#6366f1',text:'#fff'} : getTC(t);
-    const a = todoFilter===t;
+    const a = todoFilters.includes(t);
     return `<button class="ftab${a?' active':''}" style="${a?`background:${tc.bg};color:${tc.text};border-color:${tc.bg}`:''}" onclick="setTodoFilter('${t}')">${t}</button>`;
   }).join('');
 }
-function setTodoFilter(t) { todoFilter=t; renderTodoFilterTabs(); renderTodoList(); }
+function setTodoFilter(t) {
+  if (t === 'すべて') {
+    todoFilters = ['すべて'];
+  } else {
+    todoFilters = todoFilters.filter(x => x !== 'すべて');
+    if (todoFilters.includes(t)) {
+      todoFilters = todoFilters.filter(x => x !== t);
+      if (todoFilters.length === 0) todoFilters = ['すべて'];
+    } else {
+      todoFilters.push(t);
+    }
+  }
+  renderTodoFilterTabs(); renderTodoList();
+}
 
 // addSchedule is handled by Notion version below
 // deleteSchedule is handled by Notion version below
@@ -449,7 +500,7 @@ let showDone = false;
 function renderTodoList() {
   const el=document.getElementById('todo-list');
   // フィルター適用（todos配列の順番を維持、再ソートしない）
-  let list=todos.filter(t=>todoFilter==='すべて'||t.teacher===todoFilter);
+  let list=todos.filter(t=>todoFilters.includes('すべて')||todoFilters.includes(t.teacher));
   const doneCount = list.filter(t=>t.done).length;
   // 完了済みはshowDoneがtrueのとき末尾へ、falseのとき非表示
   const undone = list.filter(t=>!t.done);
@@ -498,7 +549,7 @@ function renderCalendar() {
       if(s.dateEnd&&s.dateEnd!==s.date&&dateStr>s.date&&dateStr<=s.dateEnd) return true;
       return false;
     });
-    if(listFilter!=='すべて') dayEvents=dayEvents.filter(function(s){return s.teacher===listFilter;});
+    if(!listFilters.includes('すべて')) dayEvents=dayEvents.filter(function(s){return listFilters.includes(s.teacher);});
     dayEvents.sort(function(a,b){return a.timeStart.localeCompare(b.timeStart);});
     var numClass='';
     if(dow===0) numClass='sun';
@@ -532,7 +583,7 @@ function renderCalendar() {
 // Modal
 function openModal(dateStr) {
   let dayEvents=schedules.filter(s=>s.date===dateStr);
-  if(listFilter!=='すべて') dayEvents=dayEvents.filter(s=>s.teacher===listFilter);
+  if(!listFilters.includes('すべて')) dayEvents=dayEvents.filter(s=>listFilters.includes(s.teacher));
   dayEvents.sort((a,b)=>a.timeStart.localeCompare(b.timeStart));
   if(!dayEvents.length) return;
   const d=new Date(dateStr+'T00:00:00');
@@ -611,6 +662,61 @@ function rangeDragEnter(e, date) {
   updateRangeHighlight();
 }
 
+// ===== ドラッグ中の月ナビホバー =====
+var _navHoverTimer = null;
+function onNavHover(dir) {
+  if (!_rangeDragging) return;
+  // ボタンをハイライト
+  var btn = dir < 0 ? document.getElementById('btn-prev-month') : document.getElementById('btn-next-month');
+  if (btn) btn.style.background = 'var(--accent-dim)';
+  _navHoverTimer = setTimeout(function() {
+    monthOffset += dir;
+    renderCalendar();
+    renderList();
+    updateRangeHighlight();
+    if (btn) btn.style.background = '';
+  }, 600);
+}
+function onNavLeave() {
+  if (_navHoverTimer) { clearTimeout(_navHoverTimer); _navHoverTimer = null; }
+  var prev = document.getElementById('btn-prev-month');
+  var next = document.getElementById('btn-next-month');
+  if (prev) prev.style.background = '';
+  if (next) next.style.background = '';
+}
+
+// ===== ドラッグ中の月送りゾーン =====
+var _monthJumpTimer = null;
+document.addEventListener('mousemove', function(e) {
+  if (!_rangeDragging) return;
+  var calBody = document.getElementById('cal-body');
+  if (!calBody) return;
+  var rect = calBody.getBoundingClientRect();
+  var threshold = 48; // px
+  var isNearTop    = e.clientY < rect.top + threshold;
+  var isNearBottom = e.clientY > rect.bottom - threshold;
+  if (isNearTop || isNearBottom) {
+    if (!_monthJumpTimer) {
+      _monthJumpTimer = setTimeout(function() {
+        _monthJumpTimer = null;
+        if (!_rangeDragging) return;
+        var dir = isNearTop ? -1 : 1;
+        // rangeEndを月送り後の境界日に更新
+        monthOffset += dir;
+        renderCalendar();
+        renderList();
+        // 選択ハイライトを再描画
+        updateRangeHighlight();
+      }, 700);
+    }
+  } else {
+    if (_monthJumpTimer) {
+      clearTimeout(_monthJumpTimer);
+      _monthJumpTimer = null;
+    }
+  }
+});
+
 function updateRangeHighlight() {
   var start = _rangeStart < _rangeEnd ? _rangeStart : _rangeEnd;
   var end = _rangeStart < _rangeEnd ? _rangeEnd : _rangeStart;
@@ -625,6 +731,8 @@ function updateRangeHighlight() {
 }
 
 document.addEventListener('mouseup', function(e) {
+  if (_monthJumpTimer) { clearTimeout(_monthJumpTimer); _monthJumpTimer = null; }
+  if (_navHoverTimer) { clearTimeout(_navHoverTimer); _navHoverTimer = null; }
   if (!_rangeDragging) return;
   _rangeDragging = false;
   var start = _rangeStart < _rangeEnd ? _rangeStart : _rangeEnd;
@@ -1122,7 +1230,7 @@ renderList = function() {
   var weekEnd = fmt(sunday);
   var q = (document.getElementById('search-input')||{value:''}).value.trim().toLowerCase();
   var list = schedules.filter(function(s){ return s.date >= weekStart && s.date <= weekEnd; });
-  if(listFilter !== 'すべて') list = list.filter(function(s){ return s.teacher === listFilter; });
+  if(!listFilters.includes('すべて')) list = list.filter(function(s){ return listFilters.includes(s.teacher); });
   if(q) list = list.filter(function(s){
     return (s.teacher+s.content+s.memo+s.date).toLowerCase().includes(q);
   });
