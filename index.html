@@ -263,7 +263,7 @@
 <!-- MODAL -->
 <div class="overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()">&times;</button>
     <h3 id="modal-title"></h3>
     <div class="modal-events" id="modal-events"></div>
   </div>
@@ -348,7 +348,7 @@ function renderTodoList() {
 
         </div>
       </div>
-      <button class="btn-del" onclick="deleteTodo('${t.id}')">✕</button>
+      <button class="btn-del" onclick="deleteTodo('${t.id}')">&times;</button>
     </div>`;
   }).join('');
 }
@@ -371,7 +371,7 @@ function renderList() {
         <div class="sched-sub">${s.date} ${s.timeStart} 〜 ${s.dateEnd&&s.dateEnd!==s.date?s.dateEnd+' ':''} ${s.timeEnd||''}</div>
         ${s.memo?`<div class="sched-sub">${s.memo}</div>`:''}
       </div>
-      <button class="btn-del" onclick="deleteSchedule('${s.id}')">✕</button>
+      <button class="btn-del" onclick="deleteSchedule('${s.id}')">&times;</button>
     </div>`;
   }).join('');
 }
@@ -429,7 +429,7 @@ function openModal(dateStr) {
         <div style="font-size:11px;color:#64748b;margin-top:2px">${s.timeStart} 〜 ${s.dateEnd&&s.dateEnd!==s.date?s.dateEnd+' ':''} ${s.timeEnd||''}</div>
         ${s.memo?`<div style="font-size:10px;color:#64748b;margin-top:2px">${s.memo}</div>`:''}
       </div>
-      <button class="btn-del" onclick="deleteSchedule(${s.id})">✕</button>
+      <button class="btn-del" onclick="deleteSchedule('${s.id}')">&times;</button>
     </div>`;
   }).join('');
   document.getElementById('modal').style.display='flex';
