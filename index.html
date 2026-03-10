@@ -702,6 +702,7 @@ async function loadSchedules() {
         color: tc.bg, textColor: tc.text
       };
     });
+    console.log("取得件数:", schedules.length, schedules.map(function(s){return s.date+" "+s.title;}));
     renderCalendar(); renderList();
   } catch(e) { console.error('スケジュール読み込みエラー', e); }
 }
@@ -937,6 +938,7 @@ renderList = function() {
     return (s.teacher+s.content+s.memo+s.date).toLowerCase().includes(q);
   });
   list.sort(function(a,b){ return (a.date+a.timeStart).localeCompare(b.date+b.timeStart); });
+  console.log("週間リスト件数:", list.length, "today:", today, "week:", week);
   if(!list.length){ el.innerHTML='<div class="no-item">予定はありません</div>'; return; }
   el.innerHTML = list.map(function(s){
     var cc = s.content==='告知'?'#dbeafe':s.content==='締切'?'#fee2e2':s.content==='フェア'?'#dcfce7':'#f1f5f9';
