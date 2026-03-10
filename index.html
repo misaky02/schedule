@@ -298,7 +298,7 @@
     <span id="quick-popup-date"></span>
     <button onclick="closeQuickAdd()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
   </div>
-  <input type="text" id="qp-title" placeholder="タイトル（タグ名）を入力..." onkeydown="if(event.key==='Enter')saveQuickAdd()">
+  <input type="text" id="qp-title" placeholder="タイトルを入力..." onkeydown="if(event.key==='Enter')saveQuickAdd()">
   <div class="quick-popup-row">
     <input type="time" id="qp-start" value="09:00">
     <input type="time" id="qp-end" value="10:00">
@@ -327,6 +327,7 @@
     <span>スケジュールを編集</span>
     <button onclick="closeEditPopup()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
   </div>
+  <input type="text" id="ep-title" placeholder="タイトルを入力...">
   <input type="date" id="ep-date">
   <div class="quick-popup-row">
     <input type="time" id="ep-start">
@@ -615,6 +616,7 @@ function openEditPopup(id, e) {
   var s = schedules.find(function(x){ return x.id === id; });
   if (!s) return;
   _editId = id;
+  document.getElementById('ep-title').value = s.title || '';
   document.getElementById('ep-date').value = s.date;
   document.getElementById('ep-start').value = s.timeStart || '';
   document.getElementById('ep-end').value = s.timeEnd || '';
@@ -639,6 +641,7 @@ function closeEditPopup() {
   document.removeEventListener('click', _epOutside);
 }
 async function saveEditPopup() {
+  var title = document.getElementById('ep-title').value.trim();
   var date = document.getElementById('ep-date').value;
   var start = document.getElementById('ep-start').value;
   var end = document.getElementById('ep-end').value;
@@ -652,7 +655,7 @@ async function saveEditPopup() {
   try {
     await notionAPI('PATCH', '/pages/' + _editId, {
       properties: {
-        '名前': { title: [{ text: { content: teacher + ' ' + date } }] },
+        '名前': { title: [{ text: { content: title || teacher } }] },
         '日付': { date: { start: date, end: null } },
         '開始時間': { rich_text: [{ text: { content: start } }] },
         ...(end ? { '終了時間': { rich_text: [{ text: { content: end } }] } } : {}),
@@ -874,7 +877,7 @@ async function saveQuickAdd() {
     await notionAPI('POST', '/pages', {
       parent: { database_id: SCHEDULE_DB_ID },
       properties: {
-        '名前': { title: [{ text: { content: (title||teacher) + ' ' + _qpDate } }] },
+        '名前': { title: [{ text: { content: title || teacher } }] },
         '日付': { date: { start: _qpDate, end: null } },
         '開始時間': { rich_text: [{ text: { content: start } }] },
         ...(end ? { '終了時間': { rich_text: [{ text: { content: end } }] } } : {}),
