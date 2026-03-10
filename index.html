@@ -1326,14 +1326,16 @@ renderList = function() {
     var dow = d.getDay();
     var dowName = DAYS[dow];
     var dowClass = dow===0?'sun':dow===6?'sat':'';
-    var numColor = dow===0?'#e05555':dow===6?'#5577dd':s.textColor;
+    var numColor = s.textColor;
+    var isHoliday = !!HOLIDAYS[s.date];
+    var dowColor = (dow===0||isHoliday)?'#e05555':dow===6?'#5577dd':s.textColor;
     var timeStr = s.timeStart ? s.timeStart + (s.timeEnd ? ' – '+s.timeEnd : '') : '';
     var bgColor = s.color;
     return '<div class="sched-item" style="border-left-color:'+s.textColor+';background:'+bgColor+';" onclick="openEditPopup(\''+s.id+'\',event)">'
       +'<div class="sched-item-left">'
       +'<div class="sched-date-col">'
       +'<div class="sched-day-num" style="color:'+numColor+'">'+d.getDate()+'</div>'
-      +'<div class="sched-day-name '+dowClass+'" style="color:'+(dow===0?'#e05555':dow===6?'#5577dd':s.textColor)+'">'+dowName+'</div>'
+      +'<div class="sched-day-name" style="color:'+dowColor+'">'+dowName+'</div>'
       +'</div>'
       +'<div class="sched-divider" style="background:'+s.textColor+';opacity:0.2;"></div>'
       +'<div class="sched-body">'
@@ -1341,8 +1343,9 @@ renderList = function() {
       +'<span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:'+s.textColor+';color:'+s.color+'">'+s.teacher+'</span>'
       +(cc?'<span class="sched-tag" style="background:'+cc.bg+';color:'+cc.text+'">'+s.content+'</span>':'')
       +'</div>'
+      +(s.title&&s.title!==s.teacher?'<div style="font-size:12px;font-weight:600;color:'+s.textColor+';margin-bottom:1px;">'+s.title+'</div>':'')
       +(timeStr?'<div class="sched-time" style="color:'+s.textColor+'">'+timeStr+'</div>':'')
-      +(s.memo?'<div class="sched-memo" style="margin-top:2px;color:'+s.textColor+';opacity:0.7;">'+s.memo+'</div>':'')
+      +(s.memo?'<div class="sched-memo" style="margin-top:2px;color:'+s.textColor+';opacity:0.75;">'+s.memo+'</div>':'')
       +''
       +'</div>'
       +'</div>'
