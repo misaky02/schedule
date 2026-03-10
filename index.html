@@ -12,9 +12,9 @@
     --surface: #ffffff;
     --surface2: #f2f2f5;
     --border: #e4e4e8;
-    --text: #3a3848;
-    --text-2: #888898;
-    --text-3: #c0c0c8;
+    --text: #252330;
+    --text-2: #666678;
+    --text-3: #a8a8b8;
     --accent: #c7b8e8;
     --accent-bg: #e8e0f8;
     --accent-dim: #f4f0fc;
@@ -293,11 +293,11 @@
 <div id="pin-screen" style="position:fixed;inset:0;background:#f2f2f5;z-index:9999;display:flex;align-items:center;justify-content:center;">
   <div style="background:#ffffff;border:1px solid #e4e4e8;border-radius:20px;padding:40px;box-shadow:0 20px 40px rgba(0,0,0,0.08);text-align:center;width:280px">
     <div style="font-size:32px;margin-bottom:8px">🔒</div>
-    <div style="font-size:18px;font-weight:700;color:#3a3848;margin-bottom:4px">月間スケジュール</div>
+    <div style="font-size:18px;font-weight:700;color:#252330;margin-bottom:4px">月間スケジュール</div>
     <div style="font-size:12px;color:#6b6b8a;margin-bottom:24px">PINコードを入力してください</div>
     <input type="password" id="pin-input" maxlength="6" placeholder="••••"
       autocomplete="off" inputmode="numeric"
-      style="width:100%;padding:12px;border:1.5px solid #e4e4e8;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#3a3848;background:#f2f2f5;box-sizing:border-box;">
+      style="width:100%;padding:12px;border:1.5px solid #e4e4e8;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#252330;background:#f2f2f5;box-sizing:border-box;">
     <div id="pin-error" style="color:#ff6b6b;font-size:12px;margin-top:8px;height:16px"></div>
     <button id="pin-btn" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent-bg);color:var(--accent-text);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
   </div>
@@ -2068,16 +2068,24 @@ renderList = function() {
     else label.textContent = (weekOffset > 0 ? weekOffset+'週間後' : Math.abs(weekOffset)+'週間前') + '  ' + rangeStr;
   }
   if (todayBtn) todayBtn.style.fontWeight = weekOffset === 0 ? '700' : '400';
+  // 検索中はラベルを上書き
+  if (label && q) label.textContent = '検索結果';
 
   var q = (document.getElementById('search-input')||{value:''}).value.trim().toLowerCase();
-  var list = schedules.filter(function(s){ return s.date >= weekStart && s.date <= weekEnd; });
+  // 検索ワードがある時は全期間、ない時は週間表示
+  var list;
+  if (q) {
+    list = schedules.slice();
+  } else {
+    list = schedules.filter(function(s){ return s.date >= weekStart && s.date <= weekEnd; });
+  }
   if(!listFilters.includes('すべて')) list = list.filter(function(s){ return listFilters.includes(s.teacher); });
   if(!listContentFilters.includes('すべて')) list = list.filter(function(s){ return listContentFilters.includes(s.content); });
   if(q) list = list.filter(function(s){
-    return (s.teacher+s.content+s.memo+s.date).toLowerCase().includes(q);
+    return (s.title+s.teacher+s.content+s.memo+s.date).toLowerCase().includes(q);
   });
   list.sort(function(a,b){ return (a.date+a.timeStart).localeCompare(b.date+b.timeStart); });
-  if(!list.length){ el.innerHTML='<div class="no-item">予定はありません</div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="no-item">'+(q?'「'+q+'」に一致する予定はありません':'予定はありません')+'</div>'; return; }
   var DAYS = ['日','月','火','水','木','金','土'];
   // hex色をrgbaに変換するヘルパー
   function hexToRgba(hex, alpha) {
