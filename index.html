@@ -49,16 +49,17 @@
 
   .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); justify-content: flex-start; }
   .cal-body {
-    display: grid; grid-template-columns: repeat(7,1fr);
+    display: flex; flex-direction: column;
     border-left: 1px solid var(--border); border-top: 1px solid var(--border);
-    overflow-y: hidden; flex: 0 0 auto; align-content: start;
+    overflow-y: hidden; flex: 0 0 auto;
   }
+  .cal-body > div { border-bottom: 1px solid var(--border); position: relative; }
   .week-section { border-top: 1px solid var(--border); padding: 10px 16px 10px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
   .week-section .sec-block { display: flex; flex-direction: column; gap: 8px; }
   .week-section .sched-list { overflow-y: auto; max-height: 28vh; display: flex; flex-direction: column; gap: 6px; }
 
   /* BOTTOM SPLIT */
-  .bottom-split { display: grid; grid-template-columns: 1fr 340px; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
+  .bottom-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
   .project-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
   .project-panel-inner { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
   .project-item { padding: 8px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--accent); background: var(--surface2); display: flex; align-items: flex-start; gap: 8px; cursor: pointer; transition: background 0.1s; }
@@ -121,7 +122,7 @@
   .dow-cell { text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
   .dow-cell.sun { color: #ff8888; }
   .dow-cell.sat { color: #88aaff; }
-  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 96px; padding: 5px; background: var(--surface); transition: background 0.1s; }
+  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 96px; padding: 5px; padding-bottom: 4px; background: var(--surface); transition: background 0.1s; overflow: hidden; position: relative; }
   .cal-day.other-month { background: var(--bg); }
   .cal-day.today-bg { background: #f0f0ff; }
   .cal-day.holiday-bg { background: var(--surface) !important; }
@@ -139,10 +140,16 @@
     display: flex; align-items: center; gap: 3px;
     padding: 2px 5px; border-radius: 4px; font-size: 9.5px; font-weight: 500;
     margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.6;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s;
   }
   .event-chip:hover { opacity: 0.75; }
-  .event-chip.multi-day { border-radius: 0; width: calc(100% + 2px); }
+  /* 複数日バー */
+  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 8px; }
+  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 6px; }
+  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 8px; }
+  .event-chip.multi-only { border-radius: 6px; }
+  /* 過去イベント */
+  .event-chip.past-event { opacity: 0.38; filter: grayscale(40%); }
   .event-chip[draggable] { cursor: grab; }
   .cal-day.drag-over { background: var(--accent-dim) !important; outline: 2px dashed var(--accent); }
   .cal-day.range-select { background: #e8e8ff !important; }
@@ -712,48 +719,184 @@ function renderCalendar() {
   var rawDow=firstDay.getDay();
   var startDow=(rawDow===0)?6:rawDow-1;
   var totalCells=Math.ceil((startDow+lastDay.getDate())/7)*7;
-  var html='';
+  var weeks=totalCells/7;
+
+  // セルの日付リスト
+  var cells=[];
   for(var i=0;i<totalCells;i++){
-    var cellDate=new Date(year,month,1-startDow+i);
-    var dateStr=fmt(cellDate);
-    var isThisMonth=cellDate.getMonth()===month;
-    var isToday=dateStr===todayStr;
-    var dow=cellDate.getDay();
-    var hday=HOLIDAYS[dateStr]||'';
-    var dayEvents=schedules.filter(function(s){
-      if(s.date===dateStr) return true;
-      if(s.dateEnd&&s.dateEnd!==s.date&&dateStr>s.date&&dateStr<=s.dateEnd) return true;
-      return false;
-    });
-    if(!listFilters.includes('すべて')) dayEvents=dayEvents.filter(function(s){return listFilters.includes(s.teacher);});
-    dayEvents.sort(function(a,b){return a.timeStart.localeCompare(b.timeStart);});
-    var numClass='';
-    if(dow===0) numClass='sun';
-    if(dow===6) numClass='sat';
-    if(hday) numClass+=' holiday';
-    if(isToday) numClass+=' today-circle';
-    var maxShow=5;
-    var evHtml='';
-    for(var j=0;j<Math.min(dayEvents.length,maxShow);j++){
-      var s=dayEvents[j];
-      var isStart=s.date===dateStr;
-      var isMulti=s.dateEnd&&s.dateEnd!==s.date;
-      var chipStyle='background:'+s.color+';color:'+s.textColor+';';
-      if(isMulti){
-        var isEnd=s.dateEnd===dateStr;
-        chipStyle+='border-radius:'+(isStart?'4px 0 0 4px':isEnd?'0 4px 4px 0':'0')+';width:calc(100% + 2px);';
-      }
-      var inner=isStart
-        ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+(s.content?'['+s.content+'] ':'')+s.title+'</span>')
-        :('<span style="opacity:0.6">'+(s.content?'['+s.content+'] ':'')+s.title+'</span>');
-      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" data-id="'+s.id+'" draggable="true" onclick="event.stopPropagation();openEditPopup(this.dataset.id,event)" ondragstart="onChipDragStart(event,this.dataset.id,this.dataset.date)">'+inner+'</div>';
-    }
-    if(dayEvents.length>maxShow){
-      evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openDayInput(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
-    }
-    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'" data-date="'+dateStr+'" ondblclick="openQuickAdd(this.dataset.date,event)" ondragover="calDragOver(event,this)" ondragleave="calDragLeave(this)" ondrop="calDrop(event,this)" onmousedown="rangeDragStart(event,this.dataset.date)" onmouseenter="rangeDragEnter(event,this.dataset.date)"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
+    var d=new Date(year,month,1-startDow+i);
+    cells.push(fmt(d));
   }
-  document.getElementById('cal-body').innerHTML=html;
+
+  // フィルター済みスケジュール
+  var filtered=schedules;
+  if(!listFilters.includes('すべて')) filtered=filtered.filter(function(s){return listFilters.includes(s.teacher);});
+
+  // 各週ごとにイベントの「行」を割り当て
+  var weekRows=[]; // weekRows[w] = 行割り当てリスト
+  for(var w=0;w<weeks;w++){
+    var wStart=cells[w*7]; var wEnd=cells[w*7+6];
+    // この週に表示するイベント（開始or終了or途中がこの週に含まれるもの）
+    var wEvents=filtered.filter(function(s){
+      var sEnd=s.dateEnd||s.date;
+      return s.date<=wEnd && sEnd>=wStart;
+    });
+    // 複数日イベントを先に、次に単日イベント（開始日でソート）
+    wEvents.sort(function(a,b){
+      var aMulti=(a.dateEnd&&a.dateEnd!==a.date)?1:0;
+      var bMulti=(b.dateEnd&&b.dateEnd!==b.date)?1:0;
+      if(bMulti!==aMulti) return bMulti-aMulti;
+      return a.date.localeCompare(b.date);
+    });
+    // 行割り当て（greedy）
+    var rows=[]; // rows[row] = 使用中の日付範囲リスト
+    var assign={}; // assign[s.id] = {row, colStart, colEnd}
+    wEvents.forEach(function(s){
+      var sEnd=s.dateEnd||s.date;
+      var colStart=Math.max(0,cells.indexOf(s.date,w*7)-w*7);
+      // 週またぎの場合はこの週の最初から
+      if(s.date<wStart) colStart=0;
+      var colEnd=Math.min(6,cells.indexOf(sEnd,w*7)-w*7);
+      if(sEnd>wEnd) colEnd=6;
+      if(colStart<0) colStart=0;
+      // 行を探す
+      var row=0;
+      while(true){
+        if(!rows[row]) rows[row]=[];
+        var conflict=rows[row].some(function(r){return !(r.end<colStart||r.start>colEnd);});
+        if(!conflict){ rows[row].push({start:colStart,end:colEnd}); break; }
+        row++;
+        if(row>8) break;
+      }
+      assign[s.id]={row:row,colStart:colStart,colEnd:colEnd};
+    });
+    weekRows.push({events:wEvents,assign:assign,rows:rows});
+  }
+
+  // HTML生成
+  var calBody=document.getElementById('cal-body');
+  calBody.innerHTML='';
+
+  for(var w=0;w<weeks;w++){
+    var weekEl=document.createElement('div');
+    weekEl.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);position:relative;';
+
+    // 各日セル
+    for(var d=0;d<7;d++){
+      var idx=w*7+d;
+      var dateStr=cells[idx];
+      var cellDate=new Date(dateStr+'T00:00:00');
+      var isThisMonth=cellDate.getMonth()===month;
+      var isToday=dateStr===todayStr;
+      var dow=cellDate.getDay();
+      var hday=HOLIDAYS[dateStr]||'';
+      var numClass='';
+      if(dow===0) numClass='sun';
+      if(dow===6) numClass='sat';
+      if(hday) numClass+=' holiday';
+      if(isToday) numClass+=' today-circle';
+
+      var cell=document.createElement('div');
+      cell.className='cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'');
+      cell.dataset.date=dateStr;
+      cell.setAttribute('ondblclick','openQuickAdd(this.dataset.date,event)');
+      cell.setAttribute('ondragover','calDragOver(event,this)');
+      cell.setAttribute('ondragleave','calDragLeave(this)');
+      cell.setAttribute('ondrop','calDrop(event,this)');
+      cell.setAttribute('onmousedown','rangeDragStart(event,this.dataset.date)');
+      cell.setAttribute('onmouseenter','rangeDragEnter(event,this.dataset.date)');
+
+      var numEl=document.createElement('div');
+      numEl.className='day-num '+numClass;
+      numEl.textContent=cellDate.getDate();
+      cell.appendChild(numEl);
+      if(hday){var hl=document.createElement('div');hl.className='holiday-label';hl.textContent=hday;cell.appendChild(hl);}
+
+      // セルの高さをrowsで決める（最低4行分）
+      var maxRow=(weekRows[w].rows.length||0);
+      var minH=Math.max(80, 22 + maxRow*20 + 8)+'px';
+      cell.style.minHeight=minH;
+
+      weekEl.appendChild(cell);
+    }
+
+    // イベントバーをabsoluteで配置
+    var wr=weekRows[w];
+    wr.events.forEach(function(s){
+      var a=wr.assign[s.id];
+      if(!a) return;
+      var sEnd=s.dateEnd||s.date;
+      var wStart=cells[w*7]; var wEnd=cells[w*7+6];
+      var isStart=s.date>=wStart;
+      var isEnd=sEnd<=wEnd;
+      var isPast=sEnd<todayStr;
+
+      var bar=document.createElement('div');
+      bar.className='event-chip'+(isPast?' past-event':'');
+      if(isStart&&isEnd) bar.classList.add('multi-only');
+      else if(isStart)   bar.classList.add('multi-start');
+      else if(isEnd)     bar.classList.add('multi-end');
+      else               bar.classList.add('multi-day');
+
+      // 単日イベントは通常チップ見た目に戻す
+      if(!s.dateEnd||s.dateEnd===s.date){
+        bar.classList.remove('multi-only','multi-start','multi-end','multi-day');
+      }
+
+      bar.style.cssText='position:absolute;'
+        +'left:calc('+a.colStart+'*100%/7 + 3px);'
+        +'width:calc('+(a.colEnd-a.colStart+1)+'*100%/7 - 6px);'
+        +'top:calc(22px + '+a.row+'*20px);'
+        +'height:18px;line-height:18px;z-index:2;'
+        +'background:'+s.color+';color:'+s.textColor+';'
+        +'box-sizing:border-box;';
+      bar.dataset.id=s.id;
+      bar.dataset.date=cells[w*7+a.colStart];
+      bar.setAttribute('draggable','true');
+      bar.setAttribute('onclick','event.stopPropagation();openEditPopup(this.dataset.id,event)');
+      bar.setAttribute('ondragstart','onChipDragStart(event,this.dataset.id,this.dataset.date)');
+
+      // テキスト
+      var showText=isStart||(s.date<wStart); // 週の左端にも表示
+      var inner='';
+      if(s.dateEnd&&s.dateEnd!==s.date){
+        // 複数日：開始セルとこの週の月曜にラベル
+        if(isStart||a.colStart===0){
+          inner='<span>'+(s.content?'['+s.content+'] ':'')+s.title+'</span>';
+        }
+      } else {
+        inner='<span class="event-dot" style="background:'+s.textColor+';flex-shrink:0;width:4px;height:4px;border-radius:50%;display:inline-block;"></span>'
+          +'<span>'+(s.timeStart?s.timeStart+' ':'')+s.title+'</span>';
+      }
+      bar.innerHTML=inner;
+
+      weekEl.appendChild(bar);
+    });
+
+    // 各セルの more-badge（maxRow超えたもの）
+    for(var d2=0;d2<7;d2++){
+      var dateStr2=cells[w*7+d2];
+      var visible=wr.events.filter(function(s){
+        var a=wr.assign[s.id];
+        return a && a.colStart<=d2 && a.colEnd>=d2;
+      }).length;
+      var total2=filtered.filter(function(s){
+        var sEnd=s.dateEnd||s.date;
+        return s.date<=dateStr2 && sEnd>=dateStr2;
+      }).length;
+      if(total2>visible){
+        var mb=document.createElement('div');
+        mb.className='more-badge';
+        mb.dataset.date=dateStr2;
+        mb.setAttribute('onclick','openDayInput(this.dataset.date)');
+        mb.style.cssText='position:absolute;left:calc('+d2+'*100%/7 + 3px);top:calc(22px + '+(wr.rows.length)*20+'px);font-size:9px;color:var(--text-3);cursor:pointer;';
+        mb.textContent='+'+(total2-visible)+'件';
+        weekEl.appendChild(mb);
+      }
+    }
+
+    calBody.appendChild(weekEl);
+  }
 }
 
 // Modal
