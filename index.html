@@ -311,7 +311,7 @@
   </select>
   <select id="qp-content">
     <option value="">内容（任意）</option>
-    <option>告知</option><option>締切</option><option>イベント・フェア</option>
+    <option>告知</option><option>締切</option><option>フェア</option>
   </select>
   <input type="text" id="qp-url" placeholder="URL（任意）">
   <input type="text" id="qp-memo" placeholder="メモ（任意）">
@@ -340,7 +340,7 @@
   </select>
   <select id="ep-content">
     <option value="">内容（任意）</option>
-    <option>告知</option><option>締切</option><option>イベント・フェア</option>
+    <option>告知</option><option>締切</option><option>フェア</option>
   </select>
   <input type="text" id="ep-url" placeholder="URL（任意）">
   <input type="text" id="ep-memo" placeholder="メモ（任意）">
@@ -389,7 +389,7 @@ const TEACHER_COLORS = {
 const CONTENT_COLORS = {
   '告知':             { bg: '#dbeafe', text: '#1e40af' },
   '締切':             { bg: '#fee2e2', text: '#991b1b' },
-  'イベント・フェア': { bg: '#d1fae5', text: '#065f46' },
+  'フェア': { bg: '#d1fae5', text: '#065f46' },
 };
 const TEACHERS = Object.keys(TEACHER_COLORS);
 const DAYS_JA = ['日','月','火','水','木','金','土'];
@@ -506,8 +506,8 @@ function renderCalendar() {
         chipStyle+='border-radius:'+(isStart?'4px 0 0 4px':isEnd?'0 4px 4px 0':'0')+';width:calc(100% + 2px);';
       }
       var inner=isStart
-        ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+s.timeStart+' '+s.teacher+(s.content?' ['+s.content+']':'')+'</span>')
-        :('<span style="opacity:0.6">'+s.teacher+'</span>');
+        ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+(s.content?s.content+' ':'')+s.title+'</span>')
+        :('<span style="opacity:0.6">'+(s.content||s.title)+'</span>');
       evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" data-id="'+s.id+'" draggable="true" onclick="event.stopPropagation();openEditPopup(this.dataset.id,event)" ondragstart="onChipDragStart(event,this.dataset.id,this.dataset.date)">'+inner+'</div>';
     }
     if(dayEvents.length>maxShow){
@@ -686,6 +686,7 @@ async function loadSchedules() {
       return {
         id: p.id,
         notionId: p.id,
+        title: props['名前']?.title?.[0]?.plain_text || '',
         date: dateRange?.start?.slice(0,10) || '',
         dateEnd: dateRange?.end?.slice(0,10) || dateRange?.start?.slice(0,10) || '',
         timeStart: props['開始時間']?.rich_text?.[0]?.plain_text || '',
@@ -755,6 +756,7 @@ async function loadTodos() {
       return {
         id: p.id,
         notionId: p.id,
+        title: props['名前']?.title?.[0]?.plain_text || '',
         text: props['名前']?.title?.[0]?.plain_text || '',
         teacher: props['先生名']?.select?.name || '',
         done: props['完了']?.checkbox || false,
@@ -933,8 +935,8 @@ renderList = function() {
   list.sort(function(a,b){ return (a.date+a.timeStart).localeCompare(b.date+b.timeStart); });
   if(!list.length){ el.innerHTML='<div class="no-item">予定はありません</div>'; return; }
   el.innerHTML = list.map(function(s){
-    var cc = s.content==='告知'?'#dbeafe':s.content==='締切'?'#fee2e2':s.content==='イベント'||s.content==='フェア'?'#dcfce7':'#f1f5f9';
-    var tc2 = s.content==='告知'?'#1e40af':s.content==='締切'?'#991b1b':s.content==='イベント'||s.content==='フェア'?'#166534':'#475569';
+    var cc = s.content==='告知'?'#dbeafe':s.content==='締切'?'#fee2e2':s.content==='フェア'?'#dcfce7':'#f1f5f9';
+    var tc2 = s.content==='告知'?'#1e40af':s.content==='締切'?'#991b1b':s.content==='フェア'?'#166534':'#475569';
     return '<div class="sched-item" style="background:'+s.color+'22;border-left-color:'+s.color+';">'
       +'<div><div class="sched-title">'+s.date+(s.timeStart?' '+s.timeStart:'')+(s.timeEnd?'–'+s.timeEnd:'')+'</div>'
       +'<div class="sched-sub">'+s.teacher+(s.content?' / '+s.content:'')+(s.memo?' · '+s.memo:'')+'</div>'
