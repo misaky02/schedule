@@ -58,7 +58,7 @@
   .week-section .sched-list { overflow-y: auto; max-height: 28vh; display: flex; flex-direction: column; gap: 6px; }
 
   /* BOTTOM SPLIT */
-  .bottom-split { display: grid; grid-template-columns: 1fr 260px; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
+  .bottom-split { display: grid; grid-template-columns: 1fr 340px; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
   .project-panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
   .project-panel-inner { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
   .project-item { padding: 8px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--accent); background: var(--surface2); display: flex; align-items: flex-start; gap: 8px; cursor: pointer; transition: background 0.1s; }
@@ -289,10 +289,10 @@
     <div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px">月間スケジュール</div>
     <div style="font-size:12px;color:#6b6b8a;margin-bottom:24px">PINコードを入力してください</div>
     <input type="password" id="pin-input" maxlength="6" placeholder="••••"
-      style="width:100%;padding:12px;border:1.5px solid #e4e4ee;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1a1a2e;background:#f5f5f8"
-      onkeydown="if(event.key==='Enter')checkPin()">
+      autocomplete="off" inputmode="numeric"
+      style="width:100%;padding:12px;border:1.5px solid #e4e4ee;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1a1a2e;background:#f5f5f8;box-sizing:border-box;">
     <div id="pin-error" style="color:#ff6b6b;font-size:12px;margin-top:8px;height:16px"></div>
-    <button onclick="checkPin()" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:#ccccff;color:#3a3a6e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
+    <button id="pin-btn" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:#ccccff;color:#3a3a6e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
   </div>
 </div>
 
@@ -345,6 +345,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/><rect x="1" y="4" width="4" height="4" rx="1"/><rect x="1" y="9" width="4" height="4" rx="1"/><rect x="1" y="14" width="4" height="4" rx="1"/></svg>
               プロジェクト
             </span>
+            <button onclick="openDBSettings()" title="DB設定" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:11px;color:var(--text-2);font-family:inherit;">⚙</button>
           </div>
           <div class="project-add-row">
             <input type="text" id="project-text" placeholder="プロジェクト名..." onkeydown="if(event.key==='Enter')addProject()">
@@ -425,7 +426,7 @@
   </div>
   <input type="text" id="qp-title" placeholder="タイトルを入力..." onkeydown="if(event.key==='Enter')saveQuickAdd()">
   <div class="quick-popup-row">
-    <input type="time" id="qp-start" value="09:00">
+    <input type="time" id="qp-start" value="09:00" onchange="autoSetEndTime('qp-start','qp-end')">
     <input type="time" id="qp-end" value="10:00">
   </div>
   <select id="qp-teacher">
@@ -455,7 +456,7 @@
   <input type="text" id="ep-title" placeholder="タイトルを入力...">
   <input type="date" id="ep-date">
   <div class="quick-popup-row">
-    <input type="time" id="ep-start">
+    <input type="time" id="ep-start" onchange="autoSetEndTime('ep-start','ep-end')">
     <input type="time" id="ep-end">
   </div>
   <select id="ep-teacher">
@@ -486,7 +487,21 @@
   </div>
 </div>
 
-<script>// ===== 日本の祝日 2025-2026 =====
+<script>
+const CORRECT_PIN = '1234';
+function checkPin() {
+  const input = document.getElementById('pin-input').value;
+  if (input === CORRECT_PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'flex';
+  } else {
+    document.getElementById('pin-error').textContent = 'PINコードが違います';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+
+// ===== 日本の祝日 2025-2026 =====
 const HOLIDAYS = {
   '2025-01-01':'元日','2025-01-13':'成人の日','2025-02-11':'建国記念の日',
   '2025-02-23':'天皇誕生日','2025-02-24':'振替休日','2025-03-20':'春分の日',
@@ -529,6 +544,19 @@ let monthOffset = 0;
 function getTC(t) { return TEACHER_COLORS[t] || { bg: '#e0f2fe', text: '#0c4a6e' }; }
 function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function timeToMin(t) { const [h,m]=t.split(':').map(Number); return h*60+m; }
+function autoSetEndTime(startId, endId) {
+  var sv = document.getElementById(startId).value;
+  var ev = document.getElementById(endId).value;
+  if (!sv) return;
+  // 終了時間が未設定 or 開始時間以前 or 開始と同じ場合のみ自動セット
+  if (!ev || timeToMin(ev) <= timeToMin(sv)) {
+    var [h,m] = sv.split(':').map(Number);
+    var total = h*60 + m + 60;
+    var nh = Math.floor(total/60) % 24;
+    var nm = total % 60;
+    document.getElementById(endId).value = String(nh).padStart(2,'0')+':'+String(nm).padStart(2,'0');
+  }
+}
 function getCurrentYM() {
   const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()+monthOffset);
   return { year: d.getFullYear(), month: d.getMonth() };
@@ -756,6 +784,9 @@ function closeModal(){document.getElementById('modal').style.display='none';}
 const NOTION_API_KEY = "ntn_b31540527722I0Y4KYJDnXZP0EMOHQqWLTbIZeYd4te1P6";
 const SCHEDULE_DB_ID = "31f0bbff-06a4-80fc-9a7f-db5d1a3d4cbd";
 const TODO_DB_ID     = "31f0bbff-06a4-8015-b014-e39b61b43844";
+// ▼ NotionでプロジェクトDBとタスクDBを作成後、IDを入力してください
+var PROJECT_DB_ID = localStorage.getItem('PROJECT_DB_ID') || '';
+var TASK_DB_ID    = localStorage.getItem('TASK_DB_ID') || '';
 // Notion API呼び出し
 async function notionAPI(method, endpoint, body) {
   const target = 'https://api.notion.com/v1' + endpoint;
@@ -1257,10 +1288,8 @@ async function deleteTodo(id) {
   setLoading(false);
 }
 
-// ===== プロジェクト =====
+// ===== プロジェクト（Notion連携） =====
 var projects = [];
-var nextPID = 1;
-var nextTaskID = 1;
 var projectFilter = 'すべて';
 var currentProjectId = null;
 
@@ -1279,10 +1308,8 @@ function setProjectFilter(f) {
     b.classList.toggle('active', isActive);
     if (isActive) {
       var sc = f==='すべて'?{bg:'#6366f1',text:'#fff'}:(PROJECT_STATUS_COLORS[f]||{bg:'#6366f1',text:'#fff'});
-      b.style.background = sc.bg; b.style.color = sc.text; b.style.borderColor = sc.bg;
-    } else {
-      b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
-    }
+      b.style.background=sc.bg; b.style.color=sc.text; b.style.borderColor=sc.bg;
+    } else { b.style.background=''; b.style.color=''; b.style.borderColor=''; }
   });
   renderProjects();
 }
@@ -1290,14 +1317,18 @@ function setProjectFilter(f) {
 function renderProjects() {
   var el = document.getElementById('project-list');
   if (!el) return;
-  var list = projectFilter === 'すべて' ? projects : projects.filter(function(p){ return p.status === projectFilter; });
-  if (!list.length) { el.innerHTML = '<div class="no-item">プロジェクトはありません</div>'; return; }
+  // DB未設定の場合
+  if (!PROJECT_DB_ID) {
+    el.innerHTML = '<div style="font-size:10px;color:var(--text-3);text-align:center;padding:10px 0;">DB IDを設定してください<br><button onclick="openDBSettings()" style="margin-top:6px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);font-size:10px;cursor:pointer;font-family:inherit;">⚙ 設定</button></div>';
+    return;
+  }
+  var list = projectFilter==='すべて' ? projects : projects.filter(function(p){ return p.status===projectFilter; });
+  if (!list.length) { el.innerHTML='<div class="no-item">プロジェクトはありません</div>'; return; }
   el.innerHTML = list.map(function(p){
-    var sc = PROJECT_STATUS_COLORS[p.status] || PROJECT_STATUS_COLORS['未着手'];
+    var sc = PROJECT_STATUS_COLORS[p.status]||PROJECT_STATUS_COLORS['未着手'];
     var tc = p.teacher ? getTC(p.teacher) : null;
-    var total = p.tasks ? p.tasks.length : 0;
-    var done = p.tasks ? p.tasks.filter(function(t){ return t.done; }).length : 0;
-    var pct = total > 0 ? Math.round(done/total*100) : 0;
+    var total = p.taskCount||0, done = p.taskDone||0;
+    var pct = total>0 ? Math.round(done/total*100) : 0;
     return '<div class="project-item" style="border-left-color:'+(tc?tc.bg:'var(--accent)')+';" onclick="openProjectDetail(\''+p.id+'\')">'
       +'<div class="project-item-body">'
       +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">'
@@ -1308,10 +1339,306 @@ function renderProjects() {
       +(total>0?'<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
         +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">'
         +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'#22c55e':'var(--accent)')+';border-radius:2px;"></div>'
+        +'</div><span style="font-size:9px;color:var(--text-3);font-family:JetBrains Mono,monospace;">'+done+'/'+total+'</span></div>':'')
+      +(p.memo?'<div class="project-item-meta">'+p.memo+'</div>':'')
+      +'</div>'
+      +'<button class="btn-del" onclick="event.stopPropagation();deleteProject(\''+p.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+async function loadProjects() {
+  if (!PROJECT_DB_ID) { renderProjects(); return; }
+  try {
+    const data = await notionAPI('POST', `/databases/${PROJECT_DB_ID}/query`, {
+      sorts: [{ property: 'ステータス', direction: 'ascending' }]
+    });
+    projects = data.results.map(function(p){
+      const props = p.properties;
+      return {
+        id: p.id,
+        name: props['名前']?.title?.[0]?.plain_text || '',
+        status: props['ステータス']?.select?.name || '未着手',
+        teacher: props['タグ']?.select?.name || '',
+        memo: props['メモ']?.rich_text?.[0]?.plain_text || '',
+        taskCount: 0, taskDone: 0, previewTasks: [],
+      };
+    });
+    // タスクDBがあればプレビュー取得
+    if (TASK_DB_ID && projects.length) {
+      try {
+        const tdata = await notionAPI('POST', `/databases/${TASK_DB_ID}/query`, {
+          filter: { property: '完了', checkbox: { equals: false } },
+          sorts: [{ property: '期限', direction: 'ascending' }],
+          page_size: 100
+        });
+        tdata.results.forEach(function(t){
+          const props = t.properties;
+          const pRel = props['プロジェクト']?.relation?.[0]?.id;
+          if (!pRel) return;
+          const proj = projects.find(function(p){ return p.id === pRel; });
+          if (!proj) return;
+          proj.taskCount++;
+          if (proj.previewTasks.length < 2) {
+            proj.previewTasks.push(props['名前']?.title?.[0]?.plain_text || '');
+          }
+        });
+        // 完了済みカウント
+        const ddata = await notionAPI('POST', `/databases/${TASK_DB_ID}/query`, {
+          filter: { property: '完了', checkbox: { equals: true } },
+          page_size: 100
+        });
+        ddata.results.forEach(function(t){
+          const pRel = t.properties['プロジェクト']?.relation?.[0]?.id;
+          const proj = projects.find(function(p){ return p.id === pRel; });
+          if (proj) proj.taskDone++;
+        });
+      } catch(e) { /* タスクDB未設定時は無視 */ }
+    }
+    renderProjects();
+  } catch(e) { console.error('プロジェクト読み込みエラー', e); }
+}
+
+async function addProject() {
+  var name = document.getElementById('project-text').value.trim();
+  if (!name) { alert('プロジェクト名を入力してください'); return; }
+  if (!PROJECT_DB_ID) { alert('プロジェクトDBのIDを設定してください'); openDBSettings(); return; }
+  var status = document.getElementById('project-status').value;
+  var teacher = document.getElementById('project-teacher').value;
+  var memo = document.getElementById('project-memo').value.trim();
+  setLoading(true);
+  try {
+    await notionAPI('POST', '/pages', {
+      parent: { database_id: PROJECT_DB_ID },
+      properties: {
+        '名前': { title: [{ text: { content: name } }] },
+        'ステータス': { select: { name: status } },
+        ...(teacher ? { 'タグ': { select: { name: teacher } } } : {}),
+        ...(memo ? { 'メモ': { rich_text: [{ text: { content: memo } }] } } : {}),
+      }
+    });
+    document.getElementById('project-text').value = '';
+    document.getElementById('project-memo').value = '';
+    await loadProjects();
+  } catch(e) { alert('保存に失敗しました: '+e.message); }
+  setLoading(false);
+}
+
+async function deleteProject(id) {
+  if (!confirm('削除しますか？')) return;
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', `/pages/${id}`, { in_trash: true });
+    await loadProjects();
+  } catch(e) { alert('削除に失敗しました'); }
+  setLoading(false);
+}
+
+// ===== プロジェクト詳細ページ =====
+var currentTasks = [];
+
+async function openProjectDetail(id) {
+  currentProjectId = id;
+  var p = projects.find(function(x){ return x.id===id; });
+  if (!p) return;
+  document.getElementById('pd-title').textContent = p.name;
+  var tc = p.teacher ? getTC(p.teacher) : null;
+  document.getElementById('pd-teacher').innerHTML = tc
+    ? '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:'+tc.bg+';color:'+tc.text+'">'+p.teacher+'</span>'
+    : '<span style="color:var(--text-3)">なし</span>';
+  document.getElementById('pd-memo-edit').value = p.memo||'';
+  document.getElementById('pd-status').value = p.status;
+  document.getElementById('project-detail-page').style.display = 'flex';
+  await loadTasks();
+}
+
+function closeProjectDetail() {
+  document.getElementById('project-detail-page').style.display = 'none';
+  currentProjectId = null;
+  loadProjects();
+}
+
+async function updateProjectStatus() {
+  if (!currentProjectId) return;
+  var status = document.getElementById('pd-status').value;
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', `/pages/${currentProjectId}`, {
+      properties: { 'ステータス': { select: { name: status } } }
+    });
+  } catch(e) {}
+  setLoading(false);
+}
+
+var _memoTimer = null;
+function updateProjectMemo() {
+  clearTimeout(_memoTimer);
+  _memoTimer = setTimeout(async function(){
+    if (!currentProjectId) return;
+    var memo = document.getElementById('pd-memo-edit').value;
+    try {
+      await notionAPI('PATCH', `/pages/${currentProjectId}`, {
+        properties: { 'メモ': { rich_text: [{ text: { content: memo } }] } }
+      });
+    } catch(e) {}
+  }, 800);
+}
+
+async function loadTasks() {
+  if (!TASK_DB_ID) { renderTaskList(); return; }
+  try {
+    const data = await notionAPI('POST', `/databases/${TASK_DB_ID}/query`, {
+      filter: { property: 'プロジェクト', relation: { contains: currentProjectId } },
+      sorts: [{ property: '完了', direction: 'ascending' }]
+    });
+    currentTasks = data.results.map(function(t){
+      const props = t.properties;
+      return {
+        id: t.id,
+        name: props['名前']?.title?.[0]?.plain_text || '',
+        done: props['完了']?.checkbox || false,
+        assignee: props['担当者']?.select?.name || '',
+        due: props['期限']?.date?.start?.slice(0,10) || '',
+      };
+    });
+    renderTaskList();
+  } catch(e) { console.error('タスク読み込みエラー', e); }
+}
+
+function renderTaskList() {
+  var el = document.getElementById('pd-task-list');
+  if (!el) return;
+  if (!TASK_DB_ID) {
+    el.innerHTML = '<div style="font-size:10px;color:var(--text-3);text-align:center;padding:16px 0;">タスクDBのIDを設定してください<br><button onclick="openDBSettings()" style="margin-top:6px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);font-size:10px;cursor:pointer;font-family:inherit;">⚙ 設定</button></div>';
+    return;
+  }
+  var today = fmt(new Date());
+  var total = currentTasks.length;
+  var done = currentTasks.filter(function(t){ return t.done; }).length;
+  var pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('pd-progress-bar').style.width = pct+'%';
+  document.getElementById('pd-progress-bar').style.background = pct===100?'#22c55e':'var(--accent)';
+  document.getElementById('pd-progress-text').textContent = total>0 ? done+'/'+total+' 完了 ('+pct+'%)' : 'タスクなし';
+  document.getElementById('pd-stats').textContent = total+'件中 '+done+'件完了';
+  if (!total) { el.innerHTML='<div class="no-item" style="padding:16px 0;">タスクはありません</div>'; return; }
+  var undone = currentTasks.filter(function(t){ return !t.done; });
+  var doneList = currentTasks.filter(function(t){ return t.done; });
+  el.innerHTML = [...undone,...doneList].map(function(t){
+    var tc2 = t.assignee ? getTC(t.assignee) : null;
+    var isOverdue = t.due && !t.done && t.due < today;
+    return '<div class="task-item">'
+      +'<input type="checkbox" class="task-check" '+(t.done?'checked':'')+' onchange="toggleTask(\''+t.id+'\')">'
+      +'<div class="task-body">'
+      +'<div class="task-name'+(t.done?' done':'')+'">'+t.name+'</div>'
+      +'<div class="task-meta">'
+      +(tc2?'<span class="task-assignee" style="background:'+tc2.bg+';color:'+tc2.text+'">'+t.assignee+'</span>':'')
+      +(t.due?'<span class="task-due'+(isOverdue?' overdue':'')+'">📅 '+t.due+'</span>':'')
+      +'</div></div>'
+      +'<button class="btn-del" onclick="deleteTask(\''+t.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+async function addTask() {
+  if (!TASK_DB_ID) { alert('タスクDBのIDを設定してください'); openDBSettings(); return; }
+  var name = document.getElementById('pd-task-input').value.trim();
+  if (!name) return;
+  var assignee = document.getElementById('pd-task-assignee').value;
+  var due = document.getElementById('pd-task-due').value;
+  setLoading(true);
+  try {
+    await notionAPI('POST', '/pages', {
+      parent: { database_id: TASK_DB_ID },
+      properties: {
+        '名前': { title: [{ text: { content: name } }] },
+        '完了': { checkbox: false },
+        'プロジェクト': { relation: [{ id: currentProjectId }] },
+        ...(assignee ? { '担当者': { select: { name: assignee } } } : {}),
+        ...(due ? { '期限': { date: { start: due } } } : {}),
+      }
+    });
+    document.getElementById('pd-task-input').value = '';
+    document.getElementById('pd-task-due').value = '';
+    await loadTasks();
+  } catch(e) { alert('保存に失敗しました: '+e.message); }
+  setLoading(false);
+}
+
+async function toggleTask(tid) {
+  var t = currentTasks.find(function(x){ return x.id===tid; });
+  if (!t) return;
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', `/pages/${tid}`, {
+      properties: { '完了': { checkbox: !t.done } }
+    });
+    await loadTasks();
+  } catch(e) { alert('更新に失敗しました'); }
+  setLoading(false);
+}
+
+async function deleteTask(tid) {
+  setLoading(true);
+  try {
+    await notionAPI('PATCH', `/pages/${tid}`, { in_trash: true });
+    await loadTasks();
+  } catch(e) { alert('削除に失敗しました'); }
+  setLoading(false);
+}
+
+// ===== DB ID設定モーダル =====
+function openDBSettings() {
+  document.getElementById('db-settings-modal').style.display = 'flex';
+  document.getElementById('input-project-db').value = PROJECT_DB_ID;
+  document.getElementById('input-task-db').value = TASK_DB_ID;
+}
+function closeDBSettings() {
+  document.getElementById('db-settings-modal').style.display = 'none';
+}
+function saveDBSettings() {
+  PROJECT_DB_ID = document.getElementById('input-project-db').value.trim();
+  TASK_DB_ID = document.getElementById('input-task-db').value.trim();
+  localStorage.setItem('PROJECT_DB_ID', PROJECT_DB_ID);
+  localStorage.setItem('TASK_DB_ID', TASK_DB_ID);
+  closeDBSettings();
+  loadProjects();
+}
+
+function renderProjects() {
+  var el = document.getElementById('project-list');
+  if (!el) return;
+  var list = projectFilter === 'すべて' ? projects : projects.filter(function(p){ return p.status === projectFilter; });
+  if (!list.length) { el.innerHTML = '<div class="no-item">プロジェクトはありません</div>'; return; }
+  el.innerHTML = list.map(function(p){
+    var sc = PROJECT_STATUS_COLORS[p.status] || PROJECT_STATUS_COLORS['未着手'];
+    var tc = p.teacher ? getTC(p.teacher) : null;
+    var total = (p.taskCount||0) + (p.taskDone||0);
+    var done = p.taskDone||0;
+    var pct = total > 0 ? Math.round(done/total*100) : 0;
+    var preview = (p.previewTasks||[]);
+    return '<div class="project-item" style="border-left-color:'+(tc?tc.bg:'var(--accent)')+';" onclick="openProjectDetail(\''+p.id+'\')">'
+      +'<div class="project-item-body">'
+      +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">'
+      +'<div class="project-item-name">'+p.name+'</div>'
+      +'<span class="project-status" style="background:'+sc.bg+';color:'+sc.text+'">'+p.status+'</span>'
+      +(tc?'<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;background:'+tc.bg+';color:'+tc.text+'">'+p.teacher+'</span>':'')
+      +'</div>'
+      // タスクプレビュー
+      +(preview.length ? '<div style="margin-top:5px;display:flex;flex-direction:column;gap:2px;">'
+        + preview.map(function(name){
+            return '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'
+              +'<span style="flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--accent);display:inline-block;"></span>'
+              +'<span style="overflow:hidden;text-overflow:ellipsis;">'+name+'</span>'
+              +'</div>';
+          }).join('')
+        +'</div>' : (total===0?'<div style="margin-top:4px;font-size:10px;color:var(--text-3);">タスクなし</div>':''))
+      // 進捗バー
+      +(total>0?'<div style="display:flex;align-items:center;gap:6px;margin-top:5px;">'
+        +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+(pct===100?'#22c55e':'var(--accent)')+';border-radius:2px;"></div>'
         +'</div>'
         +'<span style="font-size:9px;color:var(--text-3);font-family:JetBrains Mono,monospace;">'+done+'/'+total+'</span>'
         +'</div>':'')
-      +(p.memo?'<div class="project-item-meta">'+p.memo+'</div>':'')
       +'</div>'
       +'<button class="btn-del" onclick="event.stopPropagation();deleteProject(\''+p.id+'\')">✕</button>'
       +'</div>';
@@ -1442,12 +1769,20 @@ document.addEventListener('DOMContentLoaded', function() {
   renderTodoFilterTabs();
   renderCalendar();
   renderList();
-  renderProjects();
   loadSchedules();
   loadTodos();
+  loadProjects();
   setTimeout(notifyTodaySchedules, 2000);
-  var pi = document.getElementById("pin-input");
-  if(pi) pi.focus();
+  setTimeout(function(){ var pi=document.getElementById("pin-input"); if(pi) pi.focus(); }, 100);
+
+  // PINイベントをJS側から登録
+  var pinInput = document.getElementById('pin-input');
+  var pinBtn = document.getElementById('pin-btn');
+  if (pinInput) {
+    pinInput.addEventListener('input', function(){ if(this.value.length >= 4) checkPin(); });
+    pinInput.addEventListener('keydown', function(e){ if(e.key==='Enter') checkPin(); });
+  }
+  if (pinBtn) pinBtn.addEventListener('click', checkPin);
 });
 
 // ===== クイック追加ポップアップ =====
@@ -1670,18 +2005,6 @@ function notifyTodaySchedules() {
 }
 
 // ===== PIN LOCK =====
-const CORRECT_PIN = "1234"; // ここでPINを変更できます
-function checkPin() {
-  const input = document.getElementById('pin-input').value;
-  if (input === CORRECT_PIN) {
-    document.getElementById('pin-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'flex';
-  } else {
-    document.getElementById('pin-error').textContent = 'PINコードが違います';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
-  }
-}
 
 </script>
 
@@ -1754,6 +2077,30 @@ function checkPin() {
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- DB設定モーダル -->
+<div id="db-settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:var(--radius);padding:24px;width:min(420px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.3);border:1px solid var(--border);display:flex;flex-direction:column;gap:14px;">
+    <div style="font-size:14px;font-weight:700;color:var(--text);">⚙ NotionデータベースID設定</div>
+    <div style="font-size:11px;color:var(--text-2);line-height:1.6;">Notionで以下の構成のデータベースを作成し、URLから取得したIDを入力してください。</div>
+    <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:10.5px;color:var(--text-2);line-height:1.8;">
+      <b>プロジェクトDB</b>：名前（タイトル）、ステータス（セレクト）、タグ（セレクト）、メモ（テキスト）<br>
+      <b>タスクDB</b>：名前（タイトル）、完了（チェックボックス）、担当者（セレクト）、期限（日付）、プロジェクト（リレーション）
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10px;font-weight:600;color:var(--text-2);">プロジェクトDB ID</label>
+      <input id="input-project-db" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:monospace;background:var(--surface2);color:var(--text);outline:none;">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10px;font-weight:600;color:var(--text-2);">タスクDB ID</label>
+      <input id="input-task-db" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:monospace;background:var(--surface2);color:var(--text);outline:none;">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="closeDBSettings()" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text-2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">キャンセル</button>
+      <button onclick="saveDBSettings()" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:none;background:#ccccff;color:#3a3a6e;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">保存</button>
     </div>
   </div>
 </div>
