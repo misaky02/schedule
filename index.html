@@ -5,166 +5,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>月間スケジュール</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans JP', sans-serif; background: #f0f4f8; height: 100vh; overflow: hidden; }
+  :root {
+    --bg: #f5f5f8;
+    --surface: #ffffff;
+    --surface2: #f0f0f5;
+    --border: #e4e4ee;
+    --text: #1a1a2e;
+    --text-2: #6b6b8a;
+    --text-3: #a8a8c0;
+    --accent: #7b7bff;
+    --accent-bg: #ccccff;
+    --accent-dim: #e8e8ff;
+    --accent-text: #1a1a3a;
+    --holiday: #ff6b6b;
+    --holiday-bg: #fff0f0;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); height: 100vh; overflow: hidden; color: var(--text); }
 
   /* HEADER */
   .header {
-    background: #fff; border-bottom: 2px solid #e2e8f0;
+    background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); flex-shrink: 0;
+    flex-shrink: 0;
   }
-  .header h1 { font-size: 17px; color: #1e293b; font-weight: 700; }
-  .month-nav { display: flex; align-items: center; gap: 10px; }
+  .header h1 { font-size: 13px; color: var(--text-2); font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; }
+  .month-nav { display: flex; align-items: center; gap: 6px; }
   .month-nav button {
-    background: #f1f5f9; border: none; border-radius: 8px;
-    padding: 6px 13px; cursor: pointer; font-size: 15px; color: #475569;
-    font-family: inherit; font-weight: 700;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 10px; cursor: pointer; font-size: 13px; color: var(--text-2);
+    font-family: inherit; transition: all 0.15s;
   }
-  .month-nav button:hover { background: #e2e8f0; }
-  .month-label { font-size: 16px; font-weight: 700; color: #334155; min-width: 120px; text-align: center; }
+  .month-nav button:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .month-label { font-size: 14px; font-weight: 600; color: var(--text); min-width: 110px; text-align: center; font-family: 'JetBrains Mono', monospace; }
 
   /* LAYOUT */
-  .layout { display: grid; grid-template-columns: 1fr 310px; flex: 1; overflow: hidden; }
+  .layout { display: grid; grid-template-columns: 1fr 290px; flex: 1; overflow: hidden; }
 
   /* CALENDAR */
-  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; }
+  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
   .dow-header {
     display: grid; grid-template-columns: repeat(7,1fr);
-    background: #fff; border-bottom: 1px solid #e2e8f0; flex-shrink: 0;
+    background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-  .dow-cell { text-align: center; padding: 8px 4px; font-size: 12px; font-weight: 700; color: #64748b; }
-  .dow-cell.sun { color: #ef4444; }
-  .dow-cell.sat { color: #3b82f6; }
+  .dow-cell { text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
+  .dow-cell.sun { color: #ff8888; }
+  .dow-cell.sat { color: #88aaff; }
   .cal-body {
     display: grid; grid-template-columns: repeat(7,1fr);
-    border-left: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0;
+    border-left: 1px solid var(--border); border-top: 1px solid var(--border);
     overflow-y: auto; flex: 1; align-content: start;
   }
-  .cal-day { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; min-height: 100px; padding: 4px; background: #fff; }
-  .cal-day.other-month { background: #f8fafc; }
-  .cal-day.today-bg { background: #fefce8; }
-  .cal-day:hover { background: #f0f9ff; }
+  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 90px; padding: 5px; background: var(--surface); transition: background 0.1s; }
+  .cal-day.other-month { background: var(--bg); }
+  .cal-day.today-bg { background: #f0f0ff; }
+  .cal-day.holiday-bg { background: var(--surface) !important; }
+  .cal-day:hover { background: var(--surface2); }
   .day-num {
-    font-size: 12px; font-weight: 700; color: #334155;
-    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; margin-bottom: 2px;
+    font-size: 11px; font-weight: 500; color: var(--text-3); font-family: 'JetBrains Mono', monospace;
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; margin-bottom: 3px;
   }
-  .day-num.today-circle { background: #6366f1; color: #fff; }
-  .day-num.sun { color: #ef4444; }
-  .day-num.sat { color: #3b82f6; }
-  .other-month .day-num { color: #c8d4e0; }
+  .day-num.today-circle { background: #ccccff; color: #3a3a6e; font-weight: 700; }
+  .day-num.sun { color: #ff8888; }
+  .day-num.sat { color: #88aaff; }
+  .other-month .day-num { opacity: 0.25; }
   .event-chip {
     display: flex; align-items: center; gap: 3px;
-    padding: 2px 5px; border-radius: 4px; font-size: 10px; font-weight: 700;
-    margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.5;
+    padding: 2px 5px; border-radius: 4px; font-size: 9.5px; font-weight: 500;
+    margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.6;
+    transition: opacity 0.1s;
   }
-  .event-chip:hover { filter: brightness(0.93); }
-  .event-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .more-badge { font-size: 10px; color: #94a3b8; padding: 1px 4px; cursor: pointer; }
+  .event-chip:hover { opacity: 0.75; }
+  .event-chip.multi-day { border-radius: 0; width: calc(100% + 2px); }
+  .event-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; opacity: 0.8; }
+  .more-badge { font-size: 9px; color: var(--text-3); padding: 1px 5px; cursor: pointer; font-family: 'JetBrains Mono', monospace; }
+  .cal-day.holiday-bg { background: var(--holiday-bg); }
+  .day-num.holiday { color: var(--holiday) !important; }
+  .holiday-label { font-size: 8.5px; color: var(--holiday); font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* RIGHT PANEL */
   .panel {
-    background: #fff; border-left: 2px solid #e2e8f0;
-    overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px;
+    background: var(--surface); border-left: 1px solid var(--border);
+    overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 20px;
   }
-
-  .sec-block { display: flex; flex-direction: column; gap: 10px; }
+  .sec-block { display: flex; flex-direction: column; gap: 8px; }
   .sec-title {
-    font-size: 12px; color: #475569; font-weight: 700; letter-spacing: 0.05em;
-    border-bottom: 2px solid #f1f5f9; padding-bottom: 6px;
+    font-size: 9px; color: var(--text-3); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    padding-bottom: 7px; border-bottom: 1px solid var(--border);
   }
 
   /* Form */
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group label { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.07em; text-transform: uppercase; }
+  .form-group { display: flex; flex-direction: column; gap: 3px; }
+  .form-group label { font-size: 9px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
   .form-group input, .form-group textarea, .form-group select {
-    padding: 7px 9px; border: 1.5px solid #e2e8f0; border-radius: 7px;
-    font-size: 12px; color: #1e293b; font-family: inherit; background: #f8fafc; outline: none;
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none;
+    transition: border-color 0.15s;
   }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #6366f1; background: #fff; }
-  .form-group textarea { resize: vertical; min-height: 48px; }
-  .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 44px; }
   .btn-add {
-    padding: 9px; border-radius: 9px; border: none;
-    background: linear-gradient(135deg, #6366f1, #818cf8);
-    color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-    box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+    padding: 9px; border-radius: var(--radius-sm); border: none;
+    background: #ccccff; color: #3a3a6e; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: opacity 0.15s;
   }
-  .btn-add:hover { opacity: 0.9; }
+  .btn-add:hover { opacity: 0.85; }
 
   /* Filter tabs */
-  .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .filter-tabs { display: flex; gap: 3px; flex-wrap: wrap; }
   .ftab {
-    padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700;
-    cursor: pointer; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b;
+    padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: none; color: var(--text-2);
     transition: all 0.15s; font-family: inherit;
   }
-  .ftab.active { border-color: transparent; color: #fff; }
+  .ftab.active { border-color: transparent; }
+  .ftab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
 
   /* Schedule list */
-  .sched-list { display: flex; flex-direction: column; gap: 5px; }
+  .sched-list { display: flex; flex-direction: column; gap: 4px; }
   .sched-item {
-    padding: 7px 9px; border-radius: 8px; border-left: 3px solid;
+    padding: 7px 9px; border-radius: var(--radius-sm); border-left: 2px solid;
     display: flex; justify-content: space-between; align-items: flex-start; gap: 4px;
   }
-  .sched-title { font-size: 11px; font-weight: 700; }
-  .sched-sub { font-size: 10px; color: #64748b; margin-top: 1px; }
-  .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: 700; margin-top: 2px; }
-  .btn-del { background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 12px; flex-shrink: 0; padding: 0; }
-  .btn-del:hover { color: #ef4444; }
-  .no-item { font-size: 11px; color: #94a3b8; text-align: center; padding: 8px 0; }
+  .sched-title { font-size: 11px; font-weight: 600; }
+  .sched-sub { font-size: 10px; color: var(--text-2); margin-top: 2px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; }
+  .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; margin-top: 2px; }
+  .btn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; }
+  .btn-del:hover { color: #ff8888; background: rgba(255,100,100,0.1); }
+  .no-item { font-size: 11px; color: var(--text-3); text-align: center; padding: 12px 0; }
 
   /* TODO */
-  .todo-add-row { display: flex; gap: 6px; }
-  .todo-add-row input { flex: 1; padding: 7px 9px; border: 1.5px solid #e2e8f0; border-radius: 7px; font-size: 12px; color: #1e293b; font-family: inherit; background: #f8fafc; outline: none; }
-  .todo-add-row input:focus { border-color: #6366f1; background: #fff; }
-  .btn-todo-add { padding: 7px 12px; border-radius: 7px; border: none; background: #6366f1; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
-  .btn-todo-add:hover { opacity: 0.9; }
-  .todo-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .todo-selects select { padding: 6px 8px; border: 1.5px solid #e2e8f0; border-radius: 7px; font-size: 11px; color: #1e293b; font-family: inherit; background: #f8fafc; outline: none; }
-  .todo-selects select:focus { border-color: #6366f1; background: #fff; }
-  .todo-list { display: flex; flex-direction: column; gap: 5px; }
-  .todo-item {
-    display: flex; align-items: flex-start; gap: 8px;
-    padding: 8px 10px; border-radius: 9px; border-left: 3px solid;
-  }
-  .todo-check { width: 15px; height: 15px; border-radius: 4px; border: 2px solid #cbd5e1; cursor: pointer; flex-shrink: 0; margin-top: 2px; appearance: none; -webkit-appearance: none; position: relative; }
-  .todo-check:checked { background: #6366f1; border-color: #6366f1; }
-  .todo-check:checked::after { content: '✓'; position: absolute; color: #fff; font-size: 10px; top: -1px; left: 1px; }
-  .todo-text { font-size: 12px; font-weight: 700; color: #1e293b; }
-  .todo-text.done { text-decoration: line-through; color: #94a3b8; }
-  .todo-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 2px; align-items: center; }
-  .todo-tag { padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: 700; }
+  .todo-add-row { display: flex; gap: 5px; }
+  .todo-add-row input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; color: var(--text); font-family: inherit; background: var(--surface2); outline: none; transition: border-color 0.15s; }
+  .todo-add-row input:focus { border-color: var(--accent); }
+  .btn-todo-add { padding: 7px 11px; border-radius: var(--radius-sm); border: none; background: #ccccff; color: #3a3a6e; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-todo-add:hover { opacity: 0.85; }
+  .todo-list { display: flex; flex-direction: column; gap: 4px; }
+  .todo-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 9px; border-radius: var(--radius-sm); border-left: 2px solid; }
+  .todo-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 2px; appearance: none; -webkit-appearance: none; position: relative; transition: all 0.15s; background: var(--surface2); }
+  .todo-check:checked { background: var(--accent); border-color: var(--accent); }
+  .todo-check:checked::after { content: ''; position: absolute; left: 3px; top: 1px; width: 4px; height: 7px; border: 1.5px solid var(--accent-text); border-top: none; border-left: none; transform: rotate(45deg); }
+  .todo-text { font-size: 12px; font-weight: 400; color: var(--text); }
+  .todo-text.done { text-decoration: line-through; color: var(--text-3); }
+  .todo-meta { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+
+  /* select arrow */
+  select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a8a8c0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px !important; }
+  
 
   /* MODAL */
-  .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
-  .modal { background: #fff; border-radius: 14px; padding: 22px; width: min(380px,95vw); box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-  .modal h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); }
+  .modal { background: var(--surface); border-radius: var(--radius); padding: 22px; width: min(380px,95vw); box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
+  .modal h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
   .modal-events { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
-  .modal-event { padding: 10px 12px; border-radius: 8px; border-left: 4px solid; display: flex; justify-content: space-between; align-items: flex-start; }
-  .modal-close { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: #94a3b8; }
+  .modal-event { padding: 10px 12px; border-radius: var(--radius-sm); border-left: 3px solid; display: flex; justify-content: space-between; align-items: flex-start; }
+  .modal-close { float: right; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-3); transition: color 0.15s; }
+  .modal-close:hover { color: var(--text); }
 </style>
 </head>
 <body>
 
-<div id="pin-screen" style="position:fixed;inset:0;background:#f0f4f8;z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:20px;padding:40px;box-shadow:0 20px 50px rgba(0,0,0,0.15);text-align:center;width:280px">
+<div id="pin-screen" style="position:fixed;inset:0;background:#f5f5f8;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#ffffff;border:1px solid #e4e4ee;border-radius:20px;padding:40px;box-shadow:0 20px 40px rgba(0,0,0,0.08);text-align:center;width:280px">
     <div style="font-size:32px;margin-bottom:8px">🔒</div>
-    <div style="font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px">月間スケジュール</div>
-    <div style="font-size:12px;color:#94a3b8;margin-bottom:24px">PINコードを入力してください</div>
+    <div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px">月間スケジュール</div>
+    <div style="font-size:12px;color:#6b6b8a;margin-bottom:24px">PINコードを入力してください</div>
     <input type="password" id="pin-input" maxlength="6" placeholder="••••"
-      style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1e293b"
+      style="width:100%;padding:12px;border:1.5px solid #e4e4ee;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#1a1a2e;background:#f5f5f8"
       onkeydown="if(event.key==='Enter')checkPin()">
-    <div id="pin-error" style="color:#ef4444;font-size:12px;margin-top:8px;height:16px"></div>
-    <button onclick="checkPin()" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
+    <div id="pin-error" style="color:#ff6b6b;font-size:12px;margin-top:8px;height:16px"></div>
+    <button onclick="checkPin()" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:#ccccff;color:#3a3a6e;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
   </div>
 </div>
 
 <div id="main-content" style="display:none;flex-direction:column;height:100vh">
 <div class="header">
-  <h1>📅 月間スケジュール</h1>
+  <h1>月間スケジュール</h1>
   <div class="month-nav">
     <button onclick="changeMonth(-1)">‹</button>
     <div class="month-label" id="month-label"></div>
@@ -177,13 +197,13 @@
   <!-- CALENDAR  -->
   <div class="cal-wrap">
     <div class="dow-header">
-      <div class="dow-cell sun">日</div>
       <div class="dow-cell">月</div>
       <div class="dow-cell">火</div>
       <div class="dow-cell">水</div>
       <div class="dow-cell">木</div>
       <div class="dow-cell">金</div>
       <div class="dow-cell sat">土</div>
+      <div class="dow-cell sun">日</div>
     </div>
     <div class="cal-body" id="cal-body"></div>
   </div>
@@ -269,7 +289,23 @@
   </div>
 </div>
 
-<script>
+<script>// ===== 日本の祝日 2025-2026 =====
+const HOLIDAYS = {
+  '2025-01-01':'元日','2025-01-13':'成人の日','2025-02-11':'建国記念の日',
+  '2025-02-23':'天皇誕生日','2025-02-24':'振替休日','2025-03-20':'春分の日',
+  '2025-04-29':'昭和の日','2025-05-03':'憲法記念日','2025-05-04':'みどりの日',
+  '2025-05-05':'こどもの日','2025-05-06':'振替休日','2025-07-21':'海の日',
+  '2025-08-11':'山の日','2025-09-15':'敬老の日','2025-09-23':'秋分の日',
+  '2025-10-13':'スポーツの日','2025-11-03':'文化の日','2025-11-23':'勤労感謝の日',
+  '2025-11-24':'振替休日','2026-01-01':'元日','2026-01-12':'成人の日',
+  '2026-02-11':'建国記念の日','2026-02-23':'天皇誕生日','2026-03-20':'春分の日',
+  '2026-04-29':'昭和の日','2026-05-03':'憲法記念日','2026-05-04':'みどりの日',
+  '2026-05-05':'こどもの日','2026-05-06':'振替休日','2026-07-20':'海の日',
+  '2026-08-11':'山の日','2026-09-21':'敬老の日','2026-09-23':'秋分の日',
+  '2026-10-12':'スポーツの日','2026-11-03':'文化の日','2026-11-23':'勤労感謝の日',
+};
+
+
 const TEACHER_COLORS = {
   '小畑先生':    { bg: '#fed7aa', text: '#9a3412' },
   '山森先生':    { bg: '#fbc8d9', text: '#9d174d' },
@@ -379,36 +415,54 @@ function renderList() {
 
 // Calendar
 function renderCalendar() {
-  const {year,month}=getCurrentYM();
-  document.getElementById('month-label').textContent=`${year}年 ${month+1}月`;
-  const firstDay=new Date(year,month,1);
-  const lastDay=new Date(year,month+1,0);
-  const todayStr=fmt(new Date());
-  const startDow=firstDay.getDay();
-  const totalCells=Math.ceil((startDow+lastDay.getDate())/7)*7;
-  let html='';
-  for(let i=0;i<totalCells;i++){
-    const cellDate=new Date(year,month,1-startDow+i);
-    const dateStr=fmt(cellDate);
-    const isThisMonth=cellDate.getMonth()===month;
-    const isToday=dateStr===todayStr;
-    const dow=cellDate.getDay();
-    let dayEvents=schedules.filter(s=>s.date===dateStr);
-    if(listFilter!=='すべて') dayEvents=dayEvents.filter(s=>s.teacher===listFilter);
-    dayEvents.sort((a,b)=>a.timeStart.localeCompare(b.timeStart));
-    let numClass='';
+  var ym=getCurrentYM(); var year=ym.year; var month=ym.month;
+  document.getElementById('month-label').textContent=year+'年 '+(month+1)+'月';
+  var firstDay=new Date(year,month,1);
+  var lastDay=new Date(year,month+1,0);
+  var todayStr=fmt(new Date());
+  var rawDow=firstDay.getDay();
+  var startDow=(rawDow===0)?6:rawDow-1;
+  var totalCells=Math.ceil((startDow+lastDay.getDate())/7)*7;
+  var html='';
+  for(var i=0;i<totalCells;i++){
+    var cellDate=new Date(year,month,1-startDow+i);
+    var dateStr=fmt(cellDate);
+    var isThisMonth=cellDate.getMonth()===month;
+    var isToday=dateStr===todayStr;
+    var dow=cellDate.getDay();
+    var hday=HOLIDAYS[dateStr]||'';
+    var dayEvents=schedules.filter(function(s){
+      if(s.date===dateStr) return true;
+      if(s.dateEnd&&s.dateEnd!==s.date&&dateStr>s.date&&dateStr<=s.dateEnd) return true;
+      return false;
+    });
+    if(listFilter!=='すべて') dayEvents=dayEvents.filter(function(s){return s.teacher===listFilter;});
+    dayEvents.sort(function(a,b){return a.timeStart.localeCompare(b.timeStart);});
+    var numClass='';
     if(dow===0) numClass='sun';
     if(dow===6) numClass='sat';
+    if(hday) numClass+=' holiday';
     if(isToday) numClass+=' today-circle';
-    const maxShow=3;
-    let evHtml=dayEvents.slice(0,maxShow).map(s=>`
-      <div class="event-chip" style="background:${s.color};color:${s.textColor}" onclick="openModal('${dateStr}')">
-        <span class="event-dot" style="background:${s.textColor}"></span>
-        <span>${s.timeStart} ${s.teacher}${s.content?' ['+s.content+']':''}</span>
-      </div>`).join('');
-    if(dayEvents.length>maxShow) evHtml+=`<div class="more-badge" onclick="openModal('${dateStr}')">+${dayEvents.length-maxShow}件</div>`;
-    html+=`<div class="cal-day${!isThisMonth?' other-month':''}${isToday?' today-bg':''}">
-      <div class="day-num ${numClass}">${cellDate.getDate()}</div>${evHtml}</div>`;
+    var maxShow=5;
+    var evHtml='';
+    for(var j=0;j<Math.min(dayEvents.length,maxShow);j++){
+      var s=dayEvents[j];
+      var isStart=s.date===dateStr;
+      var isMulti=s.dateEnd&&s.dateEnd!==s.date;
+      var chipStyle='background:'+s.color+';color:'+s.textColor+';';
+      if(isMulti){
+        var isEnd=s.dateEnd===dateStr;
+        chipStyle+='border-radius:'+(isStart?'4px 0 0 4px':isEnd?'0 4px 4px 0':'0')+';width:calc(100% + 2px);';
+      }
+      var inner=isStart
+        ?('<span class="event-dot" style="background:'+s.textColor+'"></span><span>'+s.timeStart+' '+s.teacher+(s.content?' ['+s.content+']':'')+'</span>')
+        :('<span style="opacity:0.6">'+s.teacher+'</span>');
+      evHtml+='<div class="event-chip'+(isMulti?' multi-day':'')+'" style="'+chipStyle+'" data-date="'+dateStr+'" onclick="openModal(this.dataset.date)">'+inner+'</div>';
+    }
+    if(dayEvents.length>maxShow){
+      evHtml+='<div class="more-badge" data-date="'+dateStr+'" onclick="openModal(this.dataset.date)">+'+(dayEvents.length-maxShow)+'件</div>';
+    }
+    html+='<div class="cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'')+'"><div class="day-num '+numClass+'">'+cellDate.getDate()+'</div>'+(hday?'<div class="holiday-label">'+hday+'</div>':'')+evHtml+'</div>';
   }
   document.getElementById('cal-body').innerHTML=html;
 }
@@ -606,6 +660,8 @@ document.getElementById('f-date').value=fmt(new Date());
 document.getElementById('f-date-end').value=fmt(new Date());
 renderFilterTabs();
 renderTodoFilterTabs();
+renderCalendar();
+renderList();
 loadSchedules();
 loadTodos();
 
@@ -628,8 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <div id="loading" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.7);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
-  <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-  <div style="font-size:13px;color:#6366f1;font-weight:700;">Notionと同期中...</div>
+  <div style="width:40px;height:40px;border:4px solid #e4e4ee;border-top-color:#7b7bff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="font-size:12px;color:#6b6b8a;font-weight:500;">Notionと同期中...</div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </div></body>
