@@ -325,35 +325,10 @@ function renderTodoFilterTabs() {
 }
 function setTodoFilter(t) { todoFilter=t; renderTodoFilterTabs(); renderTodoList(); }
 
-// Schedule
-function addSchedule() {
-  const date=document.getElementById('f-date').value;
-  const timeStart=document.getElementById('f-time-start').value;
-  const timeEnd=document.getElementById('f-time-end').value;
-  const teacher=document.getElementById('f-teacher').value;
-  const content=document.getElementById('f-content').value;
-  const memo=document.getElementById('f-memo').value.trim();
-  if (!date||!timeStart||!teacher){alert('日付・開始時間・先生名は必須です');return;}
-  const dateEnd=document.getElementById('f-date-end').value || date;
-  if (dateEnd===date && timeEnd&&timeToMin(timeEnd)<=timeToMin(timeStart)){alert('終了時間は開始時間より後にしてください');return;}
-  const tc=getTC(teacher);
-  schedules.push({id:nextSID++,date,timeStart,dateEnd,timeEnd,teacher,content,memo,color:tc.bg,textColor:tc.text});
-  document.getElementById('f-memo').value='';
-  renderCalendar(); renderList();
-}
-function deleteSchedule(id) { schedules=schedules.filter(s=>s.id!==id); renderCalendar(); renderList(); closeModal(); }
+// addSchedule is handled by Notion version below
+// deleteSchedule is handled by Notion version below
 
-// TODO
-function addTodo() {
-  const text=document.getElementById('todo-text').value.trim();
-  const teacher=document.getElementById('todo-teacher').value;
-  if(!text){alert('TODOを入力してください');return;}
-  todos.push({id:nextTID++,text,teacher,done:false});
-  document.getElementById('todo-text').value='';
-  renderTodoList();
-}
-function toggleTodo(id){const t=todos.find(x=>x.id===id);if(t)t.done=!t.done;renderTodoList();}
-function deleteTodo(id){todos=todos.filter(x=>x.id!==id);renderTodoList();}
+// addTodo, toggleTodo, deleteTodo are handled by Notion version below
 
 function renderTodoList() {
   const el=document.getElementById('todo-list');
