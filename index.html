@@ -53,9 +53,9 @@
     border-left: 1px solid var(--border); border-top: 1px solid var(--border);
     overflow-y: hidden; flex: 0 0 auto; align-content: start;
   }
-  .week-section { border-top: 1px solid var(--border); padding: 10px 16px 10px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; max-height: 35vh; }
-  .week-section .sec-block { display: flex; flex-direction: column; gap: 8px; min-height: 0; flex: 1; }
-  .week-section .sched-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 4px; max-height: 22vh; }
+  .week-section { border-top: 1px solid var(--border); padding: 10px 16px 10px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  .week-section .sec-block { display: flex; flex-direction: column; gap: 8px; }
+  .week-section .sched-list { overflow-y: auto; max-height: 28vh; display: flex; flex-direction: column; gap: 6px; }
   .dow-header {
     display: grid; grid-template-columns: repeat(7,1fr);
     background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -146,23 +146,24 @@
   /* Schedule list */
   .sched-list { display: flex; flex-direction: column; gap: 6px; }
   .sched-item {
-    padding: 8px 10px 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid;
+    padding: 8px 10px 8px 12px; border-radius: var(--radius-sm); border-left: 4px solid;
     display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
-    background: var(--surface2); transition: background 0.1s;
+    background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: background 0.1s;
   }
-  .sched-item:hover { background: var(--border); }
+  .sched-item:hover { background: var(--surface2); }
   .sched-item-left { display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 0; }
-  .sched-date-col { display: flex; flex-direction: column; align-items: center; min-width: 34px; flex-shrink: 0; padding-top: 1px; }
-  .sched-day-num { font-size: 17px; font-weight: 700; line-height: 1; color: var(--text); font-family: 'JetBrains Mono', monospace; }
-  .sched-day-name { font-size: 9px; font-weight: 600; color: var(--text-3); letter-spacing: 0.05em; margin-top: 1px; }
-  .sched-day-name.sun { color: #ff8888; }
-  .sched-day-name.sat { color: #88aaff; }
+  .sched-date-col { display: flex; flex-direction: column; align-items: center; min-width: 36px; flex-shrink: 0; padding-top: 1px; }
+  .sched-day-num { font-size: 20px; font-weight: 800; line-height: 1; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .sched-day-name { font-size: 10px; font-weight: 700; color: var(--text-2); letter-spacing: 0.05em; margin-top: 2px; }
+  .sched-day-name.sun { color: #e05555; }
+  .sched-day-name.sat { color: #5577dd; }
+  .sched-divider { width: 1px; background: var(--border); align-self: stretch; flex-shrink: 0; margin: 1px 0; }
   .sched-body { flex: 1; min-width: 0; }
-  .sched-teacher { font-size: 11px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sched-time { font-size: 10px; color: var(--text-2); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
-  .sched-meta { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; align-items: center; }
-  .sched-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; }
-  .sched-memo { font-size: 9.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sched-teacher { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sched-time { font-size: 10.5px; color: var(--text-2); font-family: 'JetBrains Mono', monospace; margin-top: 2px; font-weight: 500; }
+  .sched-meta { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
+  .sched-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 9.5px; font-weight: 700; }
+  .sched-memo { font-size: 10px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .btn-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 11px; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; margin-top: 1px; }
   .btn-del:hover { color: #ff8888; background: rgba(255,100,100,0.1); }
   .no-item { font-size: 11px; color: var(--text-3); text-align: center; padding: 12px 0; }
@@ -1252,22 +1253,20 @@ function changeWeek(dir) {
 renderList = function() {
   var el = document.getElementById('schedule-list');
   var now = new Date();
-  var dow = now.getDay();
-  // 今週の月曜を基準にweekOffsetで週をずらす
-  var monday = new Date(now);
-  monday.setDate(now.getDate() - (dow===0?6:dow-1) + weekOffset * 7);
-  var sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-  var weekStart = fmt(monday);
-  var weekEnd = fmt(sunday);
+  // 今日 + weekOffset*7 日を起点に7日間
+  var start = new Date(now);
+  start.setDate(now.getDate() + weekOffset * 7);
+  var end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  var weekStart = fmt(start);
+  var weekEnd = fmt(end);
 
   // ラベル更新
   var label = document.getElementById('week-label');
   var todayBtn = document.getElementById('btn-week-today');
   if (label) {
-    var mStart = monday.getMonth()+1, dStart = monday.getDate();
-    var mEnd = sunday.getMonth()+1, dEnd = sunday.getDate();
-    var rangeStr = mStart+'月'+dStart+'日 〜 '+mEnd+'月'+dEnd+'日';
-    if (weekOffset === 0) label.textContent = '今週  '+rangeStr;
+    var rangeStr = (start.getMonth()+1)+'月'+start.getDate()+'日 〜 '+(end.getMonth()+1)+'月'+end.getDate()+'日';
+    if (weekOffset === 0) label.textContent = '今後7日間  '+rangeStr;
     else if (weekOffset === 1) label.textContent = '来週  '+rangeStr;
     else if (weekOffset === -1) label.textContent = '先週  '+rangeStr;
     else label.textContent = (weekOffset > 0 ? weekOffset+'週間後' : Math.abs(weekOffset)+'週間前') + '  ' + rangeStr;
@@ -1289,17 +1288,18 @@ renderList = function() {
     var dow = d.getDay();
     var dowName = DAYS[dow];
     var dowClass = dow===0?'sun':dow===6?'sat':'';
+    var numColor = dow===0?'#e05555':dow===6?'#5577dd':s.color;
     var timeStr = s.timeStart ? s.timeStart + (s.timeEnd ? ' – '+s.timeEnd : '') : '';
-    var dateLabel = (d.getMonth()+1) + '/' + d.getDate();
-    return '<div class="sched-item" style="border-left-color:'+s.color+';background:'+s.color+'18;" onclick="openEditPopup(\''+s.id+'\',event)">'
+    return '<div class="sched-item" style="border-left-color:'+s.color+';background:'+s.color+'14;" onclick="openEditPopup(\''+s.id+'\',event)">'
       +'<div class="sched-item-left">'
       +'<div class="sched-date-col">'
-      +'<div class="sched-day-num" style="color:'+s.color+'">'+d.getDate()+'</div>'
+      +'<div class="sched-day-num" style="color:'+numColor+'">'+d.getDate()+'</div>'
       +'<div class="sched-day-name '+dowClass+'">'+dowName+'</div>'
       +'</div>'
+      +'<div class="sched-divider"></div>'
       +'<div class="sched-body">'
       +'<div class="sched-teacher">'+s.teacher+'</div>'
-      +(timeStr?'<div class="sched-time">🕐 '+timeStr+'</div>':'')
+      +(timeStr?'<div class="sched-time">'+timeStr+'</div>':'')
       +'<div class="sched-meta">'
       +(cc?'<span class="sched-tag" style="background:'+cc.bg+';color:'+cc.text+'">'+s.content+'</span>':'')
       +(s.memo?'<span class="sched-memo">'+s.memo+'</span>':'')
