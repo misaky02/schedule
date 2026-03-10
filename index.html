@@ -174,7 +174,7 @@
 </div>
 
 <div class="layout">
-  <!-- CALENDAR -->
+  <!-- CALENDAR  -->
   <div class="cal-wrap">
     <div class="dow-header">
       <div class="dow-cell sun">日</div>
@@ -526,7 +526,7 @@ async function addSchedule() {
 async function deleteSchedule(id) {
   setLoading(true);
   try {
-    await notionAPI('PATCH', `/pages/${id}`, { archived: true });
+    await notionAPI('PATCH', `/pages/${id}`, { in_trash: true });
     await loadSchedules();
   } catch(e) { alert('削除に失敗しました'); }
   setLoading(false);
@@ -589,7 +589,7 @@ async function toggleTodo(id) {
 async function deleteTodo(id) {
   setLoading(true);
   try {
-    await notionAPI('PATCH', `/pages/${id}`, { archived: true });
+    await notionAPI('PATCH', `/pages/${id}`, { in_trash: true });
     await loadTodos();
   } catch(e) { alert('削除に失敗しました'); }
   setLoading(false);
