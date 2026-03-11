@@ -1587,16 +1587,27 @@ function clearPasteMode() {
 async function pasteSchedule(date) {
   if (!_copiedSchedule) return false;
   var s = _copiedSchedule;
+  var teachers = s.teachers && s.teachers.length ? s.teachers : (s.teacher ? [s.teacher] : []);
+  // 複数日イベントの場合は日数を保持
+  var newEnd = null;
+  if (s.dateEnd && s.dateEnd !== s.date) {
+    var d1 = new Date(s.date+'T00:00:00');
+    var d2 = new Date(s.dateEnd+'T00:00:00');
+    var diff = Math.round((d2-d1)/(1000*60*60*24));
+    var nd = new Date(date+'T00:00:00');
+    nd.setDate(nd.getDate() + diff);
+    newEnd = fmt(nd);
+  }
   setLoading(true);
   try {
     await notionAPI('POST', '/pages', {
       parent: { database_id: SCHEDULE_DB_ID },
       properties: {
-        '名前': { title: [{ text: { content: s.title || s.teacher } }] },
-        '日付': { date: { start: date, end: null } },
+        '名前': { title: [{ text: { content: s.title || teachers[0] || '' } }] },
+        '日付': { date: { start: date, end: newEnd } },
         '開始時間': { rich_text: [{ text: { content: s.timeStart || '' } }] },
         ...(s.timeEnd ? { '終了時間': { rich_text: [{ text: { content: s.timeEnd } }] } } : {}),
-        '先生名': { select: { name: s.teacher } },
+        '先生名': { multi_select: teachers.map(function(t){ return { name: t }; }) },
         ...(s.content ? { '内容': { select: { name: s.content } } } : {}),
         ...(s.memo ? { 'メモ': { rich_text: [{ text: { content: s.memo } }] } } : {}),
         ...(s.url ? { 'URL': { url: s.url } } : {}),
@@ -2324,22 +2335,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   setTimeout(function(){ var pi=document.getElementById("pin-input"); if(pi) pi.focus(); }, 100);
 });
 
-// ===== スケジュール コピー＆ペースト =====
-var _copiedSchedule = null;
-var _lastClickedDate = '';
-
-function copySchedule() {
-  // 詳細ポップオーバーが開いている場合はそのスケジュールをコピー
-  var pop = document.getElementById('detail-popover');
-  if (pop && pop.style.display !== 'none' && _currentDetailId) {
-    var s = schedules.find(function(x){ return x.id === _currentDetailId; });
-    if (s) {
-      _copiedSchedule = Object.assign({}, s);
-      showUndoToast('コピーしました：' + (s.title || s.teacher));
-    }
-  }
-}
-
 // ===== クイック追加ポップアップ =====
 var _qpDate = '';
 function openQuickAdd(date, e) {
@@ -2485,16 +2480,23 @@ function renderOngoing() {
     var today0 = new Date(); today0.setHours(0,0,0,0);
     var remain = Math.round((d2 - today0) / (1000*60*60*24));
     var remainStr = remain === 0 ? '今日まで' : remain+'日後まで';
+    var teachers = s.teachers && s.teachers.length ? s.teachers : (s.teacher ? [s.teacher] : []);
+    var teacherTags = teachers.map(function(t) {
+      var tc2 = TEACHER_COLORS[t] || { bg: s.color, text: s.textColor };
+      return '<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(255,255,255,0.45);color:'+s.textColor+'">'+t+'</span>';
+    }).join(' ');
     return '<div onclick="openEditPopup(\''+s.id+'\',event)" style="'+
       'cursor:pointer;padding:8px 10px;border-radius:8px;'+
       'background:'+s.color+';border-left:3px solid '+s.textColor+';'+
       'transition:opacity 0.15s;" onmouseenter="this.style.opacity=\'0.8\'" onmouseleave="this.style.opacity=\'1\'">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'+
-        '<div style="font-size:12px;font-weight:700;color:'+s.textColor+';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(s.title || s.teacher)+'</div>'+
+        '<div style="font-size:12px;font-weight:700;color:'+s.textColor+';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(s.title || teachers[0] || '')+'</div>'+
         '<div style="font-size:10px;font-weight:600;color:'+s.textColor+';opacity:0.8;flex-shrink:0;">'+remainStr+'</div>'+
       '</div>'+
       '<div style="font-size:10.5px;color:'+s.textColor+';opacity:0.75;margin-top:2px;">'+dateStr+'</div>'+
-      (s.content ? '<div style="display:inline-block;margin-top:4px;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,0.45);font-size:10px;font-weight:600;color:'+s.textColor+'">'+s.content+'</div>' : '')+
+      '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">'+teacherTags+
+      (s.content ? '<span style="display:inline-block;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,0.3);font-size:10px;font-weight:600;color:'+s.textColor+'">'+s.content+'</span>' : '')+
+      '</div>'+
     '</div>';
   }).join('');
 }
