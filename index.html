@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>月間スケジュール</title>
+<title>Schedule</title>
+<link rel="icon" href="https://img.icons8.com/?size=100&id=nKOqkIlx1gjb&format=png&color=000000">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #f7f7f9;
@@ -29,7 +30,7 @@
   /* HEADER */
   .header {
     background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; display: flex; align-items: center; justify-content: flex-start;
     flex-shrink: 0;
   }
   .header-left { display: flex; align-items: center; gap: 14px; }
@@ -398,7 +399,7 @@
 <div id="pin-screen" style="position:fixed;inset:0;background:#f2f2f5;z-index:9999;display:flex;align-items:center;justify-content:center;">
   <div style="background:#ffffff;border:1px solid #e4e4e8;border-radius:20px;padding:40px;box-shadow:0 20px 40px rgba(0,0,0,0.08);text-align:center;width:280px">
     <div style="font-size:32px;margin-bottom:8px">🔒</div>
-    <div style="font-size:18px;font-weight:700;color:#18161f;margin-bottom:4px">月間スケジュール</div>
+    <div style="font-family:'Caveat',cursive;font-size:28px;font-weight:700;color:#18161f;margin-bottom:4px">Schedule</div>
     <div style="font-size:12px;color:#6b6b8a;margin-bottom:24px">PINコードを入力してください</div>
     <input type="tel" id="pin-input" maxlength="4" placeholder="••••"
       autocomplete="off" inputmode="numeric" pattern="[0-9]*"
@@ -410,12 +411,14 @@
 </div>
 
 <div id="main-content" style="display:none;flex-direction:column;min-height:100vh">
-<div class="header" style="display:flex;align-items:center;gap:8px;padding:8px 16px;">
-  <div class="month-nav">
+<div class="header" style="display:flex;align-items:center;gap:14px;padding:8px 16px;">
+  <div style="font-family:'Caveat',cursive;font-size:26px;font-weight:700;color:var(--text);letter-spacing:0.02em;line-height:1;flex-shrink:0;">Schedule</div>
+  <div class="month-nav" style="margin-left:0;">
     <button id="btn-prev-month" onclick="changeMonth(-1)" onmouseenter="onNavHover(-1)" onmouseleave="onNavLeave()">‹</button>
     <div class="month-label" id="month-label"></div>
     <button id="btn-next-month" onclick="changeMonth(1)" onmouseenter="onNavHover(1)" onmouseleave="onNavLeave()">›</button>
   </div>
+  <div style="flex:1;"></div>
 </div>
 
 <div class="layout">
