@@ -1527,7 +1527,14 @@ function openEditPopup(id, e) {
     '<div class="dp-body">'+
       '<div class="dp-row">'+
         '<div class="dp-row-icon"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><line x1="16" y1="11" x2="22" y2="11"/></svg></div>'+
-        '<div class="dp-row-text"><span class="dp-tag" style="background:'+tc.bg+';color:'+tc.text+'">'+s.teacher+'</span>'+
+        '<div class="dp-row-text">'+
+        (function(){
+          var arr = s.teachers && s.teachers.length ? s.teachers : (s.teacher ? [s.teacher] : []);
+          return arr.map(function(t){
+            var c = TEACHER_COLORS[t] || { bg: tc.bg, text: tc.text };
+            return '<span class="dp-tag" style="background:'+c.bg+';color:'+c.text+'">'+t+'</span>';
+          }).join('&nbsp;');
+        })()+
         (s.content ? '&nbsp;<span class="dp-tag" style="background:var(--surface2);color:var(--text-2)">'+s.content+'</span>' : '')+
         '</div>'+
       '</div>'+
