@@ -123,34 +123,34 @@
   .dow-cell { text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; }
   .dow-cell.sun { color: #ff8888; }
   .dow-cell.sat { color: #b8d0f8; }
-  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 96px; padding: 5px; padding-bottom: 4px; background: var(--surface); transition: background 0.1s; overflow: hidden; position: relative; }
+  .cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 120px; padding: 6px 5px 5px; background: var(--surface); transition: background 0.1s; overflow: hidden; position: relative; }
   .cal-day.other-month { background: var(--bg); }
-  .cal-day.today-bg { background: #e8e8ff; }
+  .cal-day.today-bg { background: #eeeeff; }
   .cal-day.holiday-bg { background: var(--surface) !important; }
   .cal-day:hover { background: var(--surface2); }
   .day-num {
-    font-size: 11px; font-weight: 500; color: var(--text-3); font-family: 'JetBrains Mono', monospace;
-    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
-    border-radius: 6px; margin-bottom: 3px;
+    font-size: 12px; font-weight: 600; color: var(--text-2); font-family: 'JetBrains Mono', monospace;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; margin-bottom: 4px;
   }
-  .day-num.today-circle { background: var(--accent-bg); color: var(--accent-text); font-weight: 700; }
-  .day-num.sun { color: #ff8888; }
-  .day-num.sat { color: #b8d0f8; }
-  .other-month .day-num { opacity: 0.25; }
+  .day-num.today-circle { background: #5a4fcf; color: #fff; font-weight: 800; }
+  .day-num.sun { color: #e05555; }
+  .day-num.sat { color: #4488dd; }
+  .other-month .day-num { opacity: 0.2; }
   .event-chip {
     display: flex; align-items: center; gap: 3px;
-    padding: 2px 5px; border-radius: 4px; font-size: 9.5px; font-weight: 500;
-    margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.6;
-    transition: opacity 0.15s;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;
+    margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.7;
+    transition: opacity 0.15s; opacity: 0.95;
   }
   .event-chip:hover { opacity: 0.75; }
-  /* 複数日バー */
-  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 8px; }
-  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 6px; }
-  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 8px; }
-  .event-chip.multi-only { border-radius: 6px; }
+  /* 複数日バー — より太く濃く */
+  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 10px; font-weight: 700; }
+  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 8px; font-weight: 700; }
+  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 10px; font-weight: 700; }
+  .event-chip.multi-only { border-radius: 6px; font-weight: 700; }
   /* 過去イベント */
-  .event-chip.past-event { opacity: 0.38; filter: grayscale(40%); }
+  .event-chip.past-event { opacity: 0.32; filter: grayscale(50%); }
   .event-chip[draggable] { cursor: grab; }
   .cal-day.drag-over { background: var(--accent-dim) !important; outline: 2px dashed var(--accent); }
   .cal-day.range-select { background: #e8e8ff !important; }
@@ -605,7 +605,8 @@ function checkPin() {
     <span id="quick-popup-date"></span>
     <button onclick="closeQuickAdd()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
   </div>
-  <input type="text" id="qp-title" placeholder="タイトルを入力..." onkeydown="if(event.key==='Enter')saveQuickAdd()">
+  <input type="text" id="qp-title" placeholder="タイトルを入力..."
+    onkeydown="if(event.key==='Enter')event.preventDefault();">
   <div class="quick-popup-row">
     <input type="date" id="qp-date-start" placeholder="開始日">
     <input type="date" id="qp-date-end" placeholder="終了日（複数日）">
@@ -642,7 +643,8 @@ function checkPin() {
     <span>スケジュールを編集</span>
     <button onclick="closeEditPopup()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:14px;">✕</button>
   </div>
-  <input type="text" id="ep-title" placeholder="タイトルを入力...">
+  <input type="text" id="ep-title" placeholder="タイトルを入力..."
+    onkeydown="if(event.key==='Enter')event.preventDefault();">
   <input type="date" id="ep-date" placeholder="開始日">
   <input type="date" id="ep-date-end" placeholder="終了日（複数日の場合）">
   <div class="quick-popup-row">
@@ -1097,22 +1099,25 @@ function renderCalendar() {
 
       var bar=document.createElement('div');
       bar.className='event-chip'+(isPast?' past-event':'');
-      if(isStart&&isEnd) bar.classList.add('multi-only');
-      else if(isStart)   bar.classList.add('multi-start');
-      else if(isEnd)     bar.classList.add('multi-end');
-      else               bar.classList.add('multi-day');
-
-      // 単日イベントは通常チップ見た目に戻す
-      if(!s.dateEnd||s.dateEnd===s.date){
-        bar.classList.remove('multi-only','multi-start','multi-end','multi-day');
+      if(!isSingleDay){
+        if(isStart&&isEnd) bar.classList.add('multi-only');
+        else if(isStart)   bar.classList.add('multi-start');
+        else if(isEnd)     bar.classList.add('multi-end');
+        else               bar.classList.add('multi-day');
       }
+
+      var isSingleDay = !s.dateEnd || s.dateEnd === s.date;
+      var hasTime = !!s.timeStart;
 
       bar.style.cssText='position:absolute;'
         +'left:calc('+a.colStart+'*100%/7 + 3px);'
         +'width:calc('+(a.colEnd-a.colStart+1)+'*100%/7 - 6px);'
-        +'top:calc(22px + '+a.row+'*20px);'
-        +'height:18px;line-height:18px;z-index:2;'
-        +'background:'+s.color+';color:'+s.textColor+';'
+        +'top:calc(28px + '+a.row+'*22px);'
+        +'height:20px;line-height:20px;z-index:2;'
+        +((isSingleDay && hasTime)
+          ? 'background:transparent;color:'+s.textColor+';'
+          : 'background:'+s.color+';color:'+s.textColor+';')
+        +'font-weight:700;'
         +'box-sizing:border-box;';
       bar.dataset.id=s.id;
       bar.dataset.date=cells[w*7+a.colStart];
@@ -1120,17 +1125,21 @@ function renderCalendar() {
       bar.setAttribute('onclick','event.stopPropagation();openEditPopup(this.dataset.id,event)');
       bar.setAttribute('ondragstart','onChipDragStart(event,this.dataset.id,this.dataset.date)');
 
-      // テキスト
-      var showText=isStart||(s.date<wStart); // 週の左端にも表示
       var inner='';
-      if(s.dateEnd&&s.dateEnd!==s.date){
+      if(!isSingleDay){
         // 複数日：開始セルとこの週の月曜にラベル
         if(isStart||a.colStart===0){
-          inner='<span>'+(s.content?'['+s.content+'] ':'')+s.title+'</span>';
+          inner='<span style="font-size:10.5px;font-weight:700;">'+(s.content?'['+s.content+'] ':'')+s.title+'</span>';
         }
+      } else if(hasTime) {
+        // 単日・時間あり：●+テキスト（背景なし）
+        inner='<span style="flex-shrink:0;width:7px;height:7px;border-radius:50%;display:inline-block;background:'+s.color+';border:1.5px solid '+s.textColor+';"></span>'
+          +'<span style="font-size:10.5px;font-weight:600;color:var(--text);"><span style="color:'+s.textColor+';font-weight:700;">'+s.timeStart+'</span> '+s.title+'</span>';
+        bar.style.borderRadius='4px';
       } else {
-        inner='<span class="event-dot" style="background:'+s.textColor+';flex-shrink:0;width:4px;height:4px;border-radius:50%;display:inline-block;"></span>'
-          +'<span>'+(s.timeStart?s.timeStart+' ':'')+s.title+'</span>';
+        // 単日・時間なし：背景あり囲みチップ（border-radius明示）
+        inner='<span style="font-size:10.5px;font-weight:600;">'+s.title+'</span>';
+        bar.style.borderRadius='4px';
       }
       bar.innerHTML=inner;
 
