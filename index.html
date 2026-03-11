@@ -491,14 +491,17 @@ function checkPin() {
     <!-- 下部：週間予定＋プロジェクト -->
     <div class="bottom-split">
       <!-- 今後1週間の予定 -->
-      <div class="week-section" id="week-section">
+      <div class="week-section" id="week-section" onwheel="event.stopPropagation()">
         <div class="sec-block">
           <div class="sec-title week-title" style="display:flex;justify-content:space-between;align-items:center;">
             <span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><circle cx="8" cy="14" r="1.2" fill="currentColor"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/><circle cx="16" cy="14" r="1.2" fill="currentColor"/></svg><span id="week-label">今後1週間の予定</span></span>
             <span style="display:inline-flex;align-items:center;gap:3px;">
-              <button onclick="changeWeek(-1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="前の週">‹</button>
+              <button onclick="setListMode('week')" id="btn-mode-week" style="background:var(--accent-bg);border:1px solid var(--border);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:9px;color:var(--accent-text);font-family:inherit;line-height:1.4;font-weight:700;">週</button>
+              <button onclick="setListMode('month')" id="btn-mode-month" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:9px;color:var(--text-2);font-family:inherit;line-height:1.4;">月</button>
+              <span style="width:4px;"></span>
+              <button onclick="changeWeek(-1)" id="btn-week-prev" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="前へ">‹</button>
               <button onclick="changeWeek(0)" id="btn-week-today" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 6px;cursor:pointer;font-size:9px;color:var(--text-2);font-family:inherit;line-height:1.4;">今週</button>
-              <button onclick="changeWeek(1)" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="次の週">›</button>
+              <button onclick="changeWeek(1)" id="btn-week-next" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--text-2);font-family:inherit;line-height:1.4;" title="次へ">›</button>
             </span>
           </div>
           <div class="filter-tabs" id="filter-tabs"></div>
@@ -2458,6 +2461,25 @@ function toggleCollapse(id, titleEl) {
 
 // List
 var weekOffset = 0;
+var listMode = 'week'; // 'week' or 'month'
+
+function setListMode(mode) {
+  listMode = mode;
+  weekOffset = 0;
+  var btnWeek  = document.getElementById('btn-mode-week');
+  var btnMonth = document.getElementById('btn-mode-month');
+  var btnPrev  = document.getElementById('btn-week-prev');
+  var btnNext  = document.getElementById('btn-week-next');
+  var todayBtn = document.getElementById('btn-week-today');
+  if (btnWeek)  { btnWeek.style.background  = mode==='week'  ? 'var(--accent-bg)' : 'var(--surface2)'; btnWeek.style.color  = mode==='week'  ? 'var(--accent-text)' : 'var(--text-2)'; btnWeek.style.fontWeight  = mode==='week'  ? '700' : '400'; }
+  if (btnMonth) { btnMonth.style.background = mode==='month' ? 'var(--accent-bg)' : 'var(--surface2)'; btnMonth.style.color = mode==='month' ? 'var(--accent-text)' : 'var(--text-2)'; btnMonth.style.fontWeight = mode==='month' ? '700' : '400'; }
+  // 月モードでは前後ナビを「月」単位に
+  if (btnPrev)  btnPrev.title  = mode==='month' ? '前の月' : '前の週';
+  if (btnNext)  btnNext.title  = mode==='month' ? '次の月' : '次の週';
+  if (todayBtn) todayBtn.textContent = mode==='month' ? '今月' : '今週';
+  renderList();
+}
+
 function changeWeek(dir) {
   if (dir === 0) { weekOffset = 0; }
   else { weekOffset += dir; }
@@ -2521,30 +2543,45 @@ renderList = function() {
   renderOngoing();
   var el = document.getElementById('schedule-list');
   var now = new Date();
-  // 今日 + weekOffset*7 日を起点に7日間
-  var start = new Date(now);
-  start.setDate(now.getDate() + weekOffset * 7);
-  var end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  var weekStart = fmt(start);
-  var weekEnd = fmt(end);
+  var start, end, weekStart, weekEnd;
 
-  // ラベル更新
-  var label = document.getElementById('week-label');
-  var todayBtn = document.getElementById('btn-week-today');
-  if (label) {
-    var rangeStr = (start.getMonth()+1)+'月'+start.getDate()+'日 〜 '+(end.getMonth()+1)+'月'+end.getDate()+'日';
-    if (weekOffset === 0) label.textContent = '今後7日間  '+rangeStr;
-    else if (weekOffset === 1) label.textContent = '来週  '+rangeStr;
-    else if (weekOffset === -1) label.textContent = '先週  '+rangeStr;
-    else label.textContent = (weekOffset > 0 ? weekOffset+'週間後' : Math.abs(weekOffset)+'週間前') + '  ' + rangeStr;
+  if (listMode === 'month') {
+    // 月モード：今月 + monthOffset
+    var base = new Date(now.getFullYear(), now.getMonth() + weekOffset, 1);
+    start = new Date(base.getFullYear(), base.getMonth(), 1);
+    end   = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+    weekStart = fmt(start);
+    weekEnd   = fmt(end);
+    // ラベル
+    var label = document.getElementById('week-label');
+    if (label) label.textContent = base.getFullYear()+'年'+(base.getMonth()+1)+'月';
+    var todayBtn = document.getElementById('btn-week-today');
+    if (todayBtn) todayBtn.style.fontWeight = weekOffset === 0 ? '700' : '400';
+  } else {
+    // 週モード：今日 + weekOffset*7 日を起点に7日間
+    start = new Date(now);
+    start.setDate(now.getDate() + weekOffset * 7);
+    end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    weekStart = fmt(start);
+    weekEnd = fmt(end);
+    // ラベル更新
+    var label = document.getElementById('week-label');
+    var todayBtn = document.getElementById('btn-week-today');
+    if (label) {
+      var rangeStr = (start.getMonth()+1)+'月'+start.getDate()+'日 〜 '+(end.getMonth()+1)+'月'+end.getDate()+'日';
+      if (weekOffset === 0) label.textContent = '今後7日間  '+rangeStr;
+      else if (weekOffset === 1) label.textContent = '来週  '+rangeStr;
+      else if (weekOffset === -1) label.textContent = '先週  '+rangeStr;
+      else label.textContent = (weekOffset > 0 ? weekOffset+'週間後' : Math.abs(weekOffset)+'週間前') + '  ' + rangeStr;
+    }
+    if (todayBtn) todayBtn.style.fontWeight = weekOffset === 0 ? '700' : '400';
   }
-  if (todayBtn) todayBtn.style.fontWeight = weekOffset === 0 ? '700' : '400';
-  // 検索中はラベルを上書き
-  if (label && q) label.textContent = '検索結果';
 
   var q = (document.getElementById('search-input')||{value:''}).value.trim().toLowerCase();
-  // 検索ワードがある時は全期間、ない時は週間表示
+  // 検索中はラベルを上書き
+  if (q) { var lbl = document.getElementById('week-label'); if(lbl) lbl.textContent = '検索結果'; }
+  // 検索ワードがある時は全期間、ない時は期間表示
   var list;
   if (q) {
     list = schedules.slice();
