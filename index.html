@@ -139,16 +139,16 @@
   .other-month .day-num { opacity: 0.2; }
   .event-chip {
     display: flex; align-items: center; gap: 3px;
-    padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500;
     margin-bottom: 2px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.7;
     transition: opacity 0.15s; opacity: 0.95;
   }
   .event-chip:hover { opacity: 0.75; }
-  /* 複数日バー — より太く濃く */
-  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 10px; font-weight: 700; }
-  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 8px; font-weight: 700; }
-  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 10px; font-weight: 700; }
-  .event-chip.multi-only { border-radius: 6px; font-weight: 700; }
+  /* 複数日バー */
+  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 10px; font-weight: 600; }
+  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 8px; font-weight: 600; }
+  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 10px; font-weight: 600; }
+  .event-chip.multi-only { border-radius: 6px; font-weight: 600; }
   /* 過去イベント */
   .event-chip.past-event { opacity: 0.32; filter: grayscale(50%); }
   .event-chip[draggable] { cursor: grab; }
@@ -1129,16 +1129,16 @@ function renderCalendar() {
       if(!isSingleDay){
         // 複数日：開始セルとこの週の月曜にラベル
         if(isStart||a.colStart===0){
-          inner='<span style="font-size:10.5px;font-weight:700;">'+(s.content?'['+s.content+'] ':'')+s.title+'</span>';
+          inner='<span style="font-size:10px;font-weight:600;">'+(s.content?'['+s.content+'] ':'')+s.title+'</span>';
         }
       } else if(hasTime) {
         // 単日・時間あり：●+テキスト（背景なし）
-        inner='<span style="flex-shrink:0;width:7px;height:7px;border-radius:50%;display:inline-block;background:'+s.color+';border:1.5px solid '+s.textColor+';"></span>'
-          +'<span style="font-size:10.5px;font-weight:600;color:var(--text);"><span style="color:'+s.textColor+';font-weight:700;">'+s.timeStart+'</span> '+s.title+'</span>';
+        inner='<span style="flex-shrink:0;width:6px;height:6px;border-radius:50%;display:inline-block;background:'+s.textColor+';"></span>'
+          +'<span style="font-size:10px;font-weight:400;color:var(--text);"><span style="color:'+s.textColor+';font-weight:600;">'+s.timeStart+'</span> '+s.title+'</span>';
         bar.style.borderRadius='4px';
       } else {
-        // 単日・時間なし：背景あり囲みチップ（border-radius明示）
-        inner='<span style="font-size:10.5px;font-weight:600;">'+s.title+'</span>';
+        // 単日・時間なし：背景あり囲みチップ
+        inner='<span style="font-size:10px;font-weight:500;">'+s.title+'</span>';
         bar.style.borderRadius='4px';
       }
       bar.innerHTML=inner;
