@@ -2490,7 +2490,7 @@ function renderOngoing() {
     var teachers = s.teachers && s.teachers.length ? s.teachers : (s.teacher ? [s.teacher] : []);
     var teacherTags = teachers.map(function(t) {
       var tc2 = TEACHER_COLORS[t] || { bg: s.color, text: s.textColor };
-      return '<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(255,255,255,0.45);color:'+s.textColor+'">'+t+'</span>';
+      return '<span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:'+tc2.bg+';color:'+tc2.text+'">'+t+'</span>';
     }).join(' ');
     return '<div onclick="openEditPopup(\''+s.id+'\',event)" style="'+
       'cursor:pointer;padding:8px 10px;border-radius:8px;'+
