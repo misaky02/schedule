@@ -308,6 +308,9 @@
   select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a8a8c0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px !important; }
   
 
+  .cal-day.paste-ready { cursor: copy !important; }
+  .cal-day.paste-ready:hover { background: #e8f8e8 !important; outline: 2px dashed #7ecba0; }
+
   /* ===== DETAIL POPOVER ===== */
   .detail-popover {
     position: fixed; z-index: 350;
@@ -393,6 +396,22 @@
   .modal-close { float: right; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-3); transition: color 0.15s; }
   .modal-close:hover { color: var(--text); }
 </style>
+<script>
+var CORRECT_PIN = '1234';
+function checkPin() {
+  var input = String(document.getElementById('pin-input').value).trim();
+  if (input === CORRECT_PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    var mc = document.getElementById('main-content');
+    mc.style.display = 'flex';
+    mc.style.flexDirection = 'column';
+  } else {
+    document.getElementById('pin-error').textContent = 'PINコードが違います';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+</script>
 </head>
 <body>
 
@@ -401,12 +420,13 @@
     <div style="font-size:32px;margin-bottom:8px">🔒</div>
     <div style="font-family:'Caveat',cursive;font-size:28px;font-weight:700;color:#18161f;margin-bottom:4px">Schedule</div>
     <div style="font-size:12px;color:#6b6b8a;margin-bottom:24px">PINコードを入力してください</div>
-    <input type="tel" id="pin-input" maxlength="4" placeholder="••••"
+    <input type="password" id="pin-input" maxlength="4" placeholder="••••"
       autocomplete="off" inputmode="numeric" pattern="[0-9]*"
       style="width:100%;padding:12px;border:1.5px solid #e4e4e8;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;color:#18161f;background:#f2f2f5;box-sizing:border-box;"
-      oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);if(this.value.length>=4)checkPin()">
+      oninput="var v=this.value.replace(/[^0-9]/g,'').slice(0,4);if(this.value!==v)this.value=v;if(v.length===4)checkPin();"
+      onkeydown="if(event.key==='Enter')checkPin();">
     <div id="pin-error" style="color:#ff6b6b;font-size:12px;margin-top:8px;height:16px"></div>
-    <button id="pin-btn" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent-bg);color:var(--accent-text);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
+    <button id="pin-btn" onclick="checkPin()" style="margin-top:16px;width:100%;padding:12px;border:none;border-radius:10px;background:var(--accent-bg);color:var(--accent-text);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">入力</button>
   </div>
 </div>
 
@@ -501,6 +521,17 @@
     
 
     
+    <!-- 進行中の複数日イベント -->
+    <div class="sec-block" id="ongoing-block">
+      <div class="sec-title">
+        <span style="display:inline-flex;align-items:center;gap:5px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M8 14h8M8 18h5"/></svg>
+          進行中スケジュール
+        </span>
+      </div>
+      <div id="ongoing-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+    </div>
+
     <!-- 検索 -->
     <div class="sec-block">
       <div class="sec-title"><span style="display:inline-flex;align-items:center;gap:5px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>検索</span></div>
@@ -612,21 +643,6 @@
 </div>
 
 <script>
-const CORRECT_PIN = '1234';
-function checkPin() {
-  const input = String(document.getElementById('pin-input').value).trim();
-  if (input === CORRECT_PIN) {
-    document.getElementById('pin-screen').style.display = 'none';
-    var mc = document.getElementById('main-content');
-    mc.style.display = 'flex';
-    mc.style.flexDirection = 'column';
-  } else {
-    document.getElementById('pin-error').textContent = 'PINコードが違います';
-    document.getElementById('pin-input').value = '';
-    document.getElementById('pin-input').focus();
-  }
-}
-
 // ===== 日本の祝日 2025-2026 =====
 const HOLIDAYS = {
   '2025-01-01':'元日','2025-01-13':'成人の日','2025-02-11':'建国記念の日',
@@ -919,6 +935,7 @@ function renderCalendar() {
       cell.className='cal-day'+(isThisMonth?'':' other-month')+(isToday?' today-bg':'');
       cell.dataset.date=dateStr;
       cell.setAttribute('ondblclick','openQuickAdd(this.dataset.date,event)');
+      cell.setAttribute('onclick','_lastClickedDate=this.dataset.date');
       cell.setAttribute('ondragover','calDragOver(event,this)');
       cell.setAttribute('ondragleave','calDragLeave(this)');
       cell.setAttribute('ondrop','calDrop(event,this)');
@@ -1304,6 +1321,8 @@ function showUndoToast(msg) {
 document.addEventListener('keydown', function(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
   if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'c') { copySchedule(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'v') { pasteSchedule(); }
 });
 
 // ===== TODO ドラッグ並べ替え =====
@@ -1342,8 +1361,10 @@ document.addEventListener('dragend', function() {
 // ===== 詳細ポップオーバー（Google カレンダー風）=====
 var _editId = '';
 var _detailOutside = null;
+var _currentDetailId = '';
 function openEditPopup(id, e) {
   e.stopPropagation();
+  _currentDetailId = id;
   var s = schedules.find(function(x){ return x.id === id; });
   if (!s) return;
   var pop = document.getElementById('detail-popover');
@@ -1368,6 +1389,7 @@ function openEditPopup(id, e) {
         '<div class="dp-date">'+dateStr+(timeStr ? '　'+timeStr : '')+'</div>'+
       '</div>'+
       '<div class="dp-header-actions">'+
+        '<button class="dp-btn" onclick="copySchedule(\''+id+'\')" title="コピー"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>'+
         '<button class="dp-btn" onclick="openEditFormFromDetail(\''+id+'\')" title="編集"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
         '<button class="dp-btn" onclick="if(confirm(\'削除しますか？\')){closeDetailPopover();deleteSchedule(\''+id+'\')}" title="削除"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
         '<button class="dp-btn" onclick="closeDetailPopover()" title="閉じる"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
@@ -1406,6 +1428,58 @@ function openEditPopup(id, e) {
     if (!pop.contains(ev.target)) closeDetailPopover();
   };
   setTimeout(function(){ document.addEventListener('click', _detailOutside); }, 100);
+}
+
+// ===== スケジュールのコピー＆ペースト =====
+var _copiedSchedule = null;
+
+function copySchedule(id) {
+  var s = schedules.find(function(x){ return x.id === id; });
+  if (!s) return;
+  _copiedSchedule = s;
+  closeDetailPopover();
+  showUndoToast('コピーしました　日付をダブルクリックでペースト');
+  // カレンダーセルにペースト可能の視覚ヒント
+  document.querySelectorAll('.cal-day').forEach(function(el){
+    el.classList.add('paste-ready');
+  });
+  // 10秒後に解除
+  clearTimeout(_pasteTimeout);
+  _pasteTimeout = setTimeout(clearPasteMode, 10000);
+}
+var _pasteTimeout = null;
+
+function clearPasteMode() {
+  _copiedSchedule = null;
+  document.querySelectorAll('.cal-day.paste-ready').forEach(function(el){
+    el.classList.remove('paste-ready');
+  });
+}
+
+async function pasteSchedule(date) {
+  if (!_copiedSchedule) return false;
+  var s = _copiedSchedule;
+  setLoading(true);
+  try {
+    await notionAPI('POST', '/pages', {
+      parent: { database_id: SCHEDULE_DB_ID },
+      properties: {
+        '名前': { title: [{ text: { content: s.title || s.teacher } }] },
+        '日付': { date: { start: date, end: null } },
+        '開始時間': { rich_text: [{ text: { content: s.timeStart || '' } }] },
+        ...(s.timeEnd ? { '終了時間': { rich_text: [{ text: { content: s.timeEnd } }] } } : {}),
+        '先生名': { select: { name: s.teacher } },
+        ...(s.content ? { '内容': { select: { name: s.content } } } : {}),
+        ...(s.memo ? { 'メモ': { rich_text: [{ text: { content: s.memo } }] } } : {}),
+        ...(s.url ? { 'URL': { url: s.url } } : {}),
+      }
+    });
+    showUndoToast('ペーストしました');
+    clearPasteMode();
+    await loadSchedules();
+  } catch(e) { alert('ペーストに失敗しました: ' + e.message); }
+  setLoading(false);
+  return true;
 }
 
 function closeDetailPopover() {
@@ -1513,7 +1587,7 @@ async function loadSchedules() {
         color: tc.bg, textColor: tc.text
       };
     });
-    renderCalendar(); renderList();
+    renderCalendar(); renderList(); renderOngoing();
     saveHistory();
   } catch(e) { console.error('スケジュール読み込みエラー', e); }
 }
@@ -2117,18 +2191,30 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   setTimeout(notifyTodaySchedules, 2000);
   setTimeout(function(){ var pi=document.getElementById("pin-input"); if(pi) pi.focus(); }, 100);
-
-  // PINイベント
-  var pinBtn = document.getElementById('pin-btn');
-  var pinInput = document.getElementById('pin-input');
-  if (pinBtn) pinBtn.addEventListener('click', checkPin);
-  if (pinInput) pinInput.addEventListener('keydown', function(e){ if(e.key==='Enter') checkPin(); });
 });
+
+// ===== スケジュール コピー＆ペースト =====
+var _copiedSchedule = null;
+var _lastClickedDate = '';
+
+function copySchedule() {
+  // 詳細ポップオーバーが開いている場合はそのスケジュールをコピー
+  var pop = document.getElementById('detail-popover');
+  if (pop && pop.style.display !== 'none' && _currentDetailId) {
+    var s = schedules.find(function(x){ return x.id === _currentDetailId; });
+    if (s) {
+      _copiedSchedule = Object.assign({}, s);
+      showUndoToast('コピーしました：' + (s.title || s.teacher));
+    }
+  }
+}
 
 // ===== クイック追加ポップアップ =====
 var _qpDate = '';
 function openQuickAdd(date, e) {
   e.stopPropagation();
+  // ペーストモードなら貼り付け
+  if (_copiedSchedule) { pasteSchedule(date); return; }
   _qpDate = date;
   var popup = document.getElementById('quick-popup');
   var d = new Date(date+'T00:00:00');
@@ -2236,7 +2322,54 @@ function changeWeek(dir) {
   renderList();
 }
 
+// ===== 進行中の複数日イベント =====
+function renderOngoing() {
+  var today = fmt(new Date());
+  var block = document.getElementById('ongoing-block');
+  var list  = document.getElementById('ongoing-list');
+  if (!block || !list) return;
+
+  var q = '';
+
+  // 複数日かつ今日が開始〜終了の範囲内にあるもの
+  var ongoing = schedules.filter(function(s) {
+    if (!s.dateEnd || s.dateEnd === s.date) return false;
+    return s.date <= today && s.dateEnd >= today;
+  });
+
+  // 件数0なら空メッセージ表示
+  if (ongoing.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-3);padding:4px 2px;">'+(q ? '一致する進行中スケジュールはありません' : '現在進行中のスケジュールはありません')+'</div>';
+    return;
+  }
+  block.style.display = '';
+  var countEl = document.getElementById('ongoing-count');
+  if (countEl) countEl.textContent = '（' + ongoing.length + '）';
+
+  var DAYS = ['日','月','火','水','木','金','土'];
+  list.innerHTML = ongoing.map(function(s) {
+    var d1 = new Date(s.date+'T00:00:00');
+    var d2 = new Date(s.dateEnd+'T00:00:00');
+    var dateStr = (d1.getMonth()+1)+'/'+d1.getDate()+' 〜 '+(d2.getMonth()+1)+'/'+d2.getDate()+'（'+DAYS[d2.getDay()]+'）';
+    var today0 = new Date(); today0.setHours(0,0,0,0);
+    var remain = Math.round((d2 - today0) / (1000*60*60*24));
+    var remainStr = remain === 0 ? '今日まで' : remain+'日後まで';
+    return '<div onclick="openEditPopup(\''+s.id+'\',event)" style="'+
+      'cursor:pointer;padding:8px 10px;border-radius:8px;'+
+      'background:'+s.color+';border-left:3px solid '+s.textColor+';'+
+      'transition:opacity 0.15s;" onmouseenter="this.style.opacity=\'0.8\'" onmouseleave="this.style.opacity=\'1\'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'+
+        '<div style="font-size:12px;font-weight:700;color:'+s.textColor+';overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(s.title || s.teacher)+'</div>'+
+        '<div style="font-size:10px;font-weight:600;color:'+s.textColor+';opacity:0.8;flex-shrink:0;">'+remainStr+'</div>'+
+      '</div>'+
+      '<div style="font-size:10.5px;color:'+s.textColor+';opacity:0.75;margin-top:2px;">'+dateStr+'</div>'+
+      (s.content ? '<div style="display:inline-block;margin-top:4px;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,0.45);font-size:10px;font-weight:600;color:'+s.textColor+'">'+s.content+'</div>' : '')+
+    '</div>';
+  }).join('');
+}
+
 renderList = function() {
+  renderOngoing();
   var el = document.getElementById('schedule-list');
   var now = new Date();
   // 今日 + weekOffset*7 日を起点に7日間
