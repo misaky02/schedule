@@ -46,18 +46,18 @@
   .month-label { font-size: 14px; font-weight: 600; color: var(--text); min-width: 110px; text-align: center; font-family: 'JetBrains Mono', monospace; }
 
   /* LAYOUT */
-  .layout { display: grid; grid-template-columns: 1fr 290px; flex: 1; overflow: hidden; min-height: 0; }
+  .layout { display: grid; grid-template-columns: 1fr 290px; flex: 1; overflow: hidden; min-height: 0; height: 0; }
 
-  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); justify-content: flex-start; }
+  .cal-wrap { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); flex: 1; min-height: 0; }
   .cal-body {
     display: flex; flex-direction: column;
     border-left: 1px solid var(--border); border-top: 1px solid var(--border);
-    overflow-y: hidden; flex: 0 0 auto;
+    overflow-y: hidden; flex: 1; min-height: 0;
   }
-  .cal-body > div { border-bottom: 1px solid var(--border); position: relative; }
-  .week-section { border-top: 1px solid var(--border); padding: 10px 16px 10px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
-  .week-section .sec-block { display: flex; flex-direction: column; gap: 8px; }
-  .week-section .sched-list { overflow-y: auto; max-height: 28vh; display: flex; flex-direction: column; gap: 6px; }
+  .cal-body > div { border-bottom: 1px solid var(--border); position: relative; flex: 1; }
+  .week-section { border-top: 1px solid var(--border); padding: 6px 16px 6px; background: var(--surface); flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; max-height: 22vh; overflow: hidden; }
+  .week-section .sec-block { display: flex; flex-direction: column; gap: 5px; }
+  .week-section .sched-list { overflow-y: auto; max-height: 16vh; display: flex; flex-direction: column; gap: 4px; }
 
   /* BOTTOM SPLIT */
   .bottom-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border); flex: 0 0 auto; min-height: 0; }
@@ -145,10 +145,10 @@
   }
   .event-chip:hover { opacity: 0.75; }
   /* 複数日バー */
-  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 10px; font-weight: 600; }
-  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 8px; font-weight: 600; }
-  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 10px; font-weight: 600; }
-  .event-chip.multi-only { border-radius: 6px; font-weight: 600; }
+  .event-chip.multi-day  { border-radius: 0; margin-left: -6px; margin-right: -6px; padding-left: 10px; font-weight: 500; }
+  .event-chip.multi-start{ border-radius: 6px 0 0 6px; margin-right: -6px; padding-left: 8px; font-weight: 500; }
+  .event-chip.multi-end  { border-radius: 0 6px 6px 0; margin-left: -6px; padding-left: 10px; font-weight: 500; }
+  .event-chip.multi-only { border-radius: 6px; font-weight: 500; }
   /* 過去イベント */
   .event-chip.past-event { opacity: 0.32; filter: grayscale(50%); }
   .event-chip[draggable] { cursor: grab; }
@@ -464,7 +464,7 @@ function checkPin() {
   </div>
 </div>
 
-<div id="main-content" style="display:none;flex-direction:column;min-height:100vh">
+<div id="main-content" style="display:none;flex-direction:column;height:100vh;overflow:hidden;">
 <div class="header" style="display:flex;align-items:center;gap:14px;padding:8px 16px;">
   <div style="font-family:'Caveat',cursive;font-size:26px;font-weight:700;color:var(--text);letter-spacing:0.02em;line-height:1;flex-shrink:0;">Schedule</div>
   <div class="month-nav" style="margin-left:0;">
